@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="bg-white">
   <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-142997649-1"></script>
@@ -37,29 +37,8 @@
       .rotate270 { transform:rotate(270deg) translate(-100%); }
       svg { cursor:pointer; }
       svg:hover { fill-opacity:0.8; }
-      /* HSV, V±70 */
-      [data-theme="dark"] { background-color: black; color: #9baec2; }
-      [data-theme="dark"] a { color: #0099ff; }
-      [data-theme="dark"] .card {
-        background-color: black;
-        border: 1px solid rgba(255,255,255,.125);
-      }
-      [data-theme="dark"] .card-header {
-        background-color: rgba(255,255,255,.03);
-        border-bottom: 1px solid rgba(255,255,255,.125)
-      }
-      [data-theme="dark"] .form-control {
-        color: #c9ddf0;
-        background-color:black;
-        border: 1px solid #242526;
-      }
-      [data-theme="dark"] .navbar-brand { color:white; }
-      [data-theme="dark"] .navbar-brand:hover { color: white; }
-      [data-theme="dark"] .close { color:white; }
-      [data-theme="dark"] svg { fill:white; }
-      [data-theme="dark"] .alert-warning { background-color:#4d493d; color:#ffc108; border-color:#4d4738; }
-      [data-theme="dark"] .alert-info { background-color:#373f40; color:#1fddff; border-color:#2d3738; }
-      [data-theme="dark"] .btn-primary { background-color: #9baec2; border-color:#9baec2; color:white; }
+      html[data-theme="dark"] { filter: invert(1) hue-rotate(180deg); }
+      html[data-theme="dark"] canvas { filter: invert(1) hue-rotate(180deg); }
     </style>
     <script data-ad-client="ca-pub-6459713332128733" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   </head>
