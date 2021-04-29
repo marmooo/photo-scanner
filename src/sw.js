@@ -1,4 +1,4 @@
-var CACHE_NAME = '2020-05-11 16:50';
+var CACHE_NAME = '2021-04-29 18:45';
 var urlsToCache = [
   '/photo-scanner/js/opencv.js',
   '/photo-scanner/js/index.js',
@@ -7,12 +7,12 @@ var urlsToCache = [
   '/photo-scanner/img/loading.gif',
   '/photo-scanner/denoise/model.json',
   '/photo-scanner/denoise/group1-shard1of1.bin',
-  'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.slim.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/dropbox.js/4.0.30/Dropbox-sdk.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css',
-  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js'
+  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css',
+  'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js',
+  'https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js',
+  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js',
+  'https://cdn.jsdelivr.net/npm/dropbox@9.6.0/dist/Dropbox-sdk.min.js',
+  'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js',
 ];
 
 self.addEventListener('install', function(event) {
