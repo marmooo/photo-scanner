@@ -2,9 +2,6 @@
 スマホや PC で文書のスキャンを効率化する[アプリ](https://marmooo.github.io/photo-scanner/)です。
 カメラで撮影した写真を、スキャナー画像のように自動で補正します。
 
-## Dependencies
-- OpenCV 4.5.2
-
 ## Build
 ```
 build_model.sh
