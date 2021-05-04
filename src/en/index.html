@@ -37,7 +37,8 @@
       .rotate270 { transform:rotate(270deg) translate(-100%); }
       svg { cursor:pointer; }
       svg:hover { fill-opacity:0.8; }
-      html[data-theme="dark"] { filter: invert(1) hue-rotate(180deg); background-color:black; }
+      html[data-theme="dark"] { filter: invert(1) hue-rotate(180deg); }
+      @-moz-document url-prefix() { html[data-theme="dark"] { background-color:black; } }
       html[data-theme="dark"] canvas { filter: invert(1) hue-rotate(180deg); }
     </style>
     <script data-ad-client="ca-pub-6459713332128733" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
