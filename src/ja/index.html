@@ -44,23 +44,25 @@
     <script data-ad-client="ca-pub-6459713332128733" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   </head>
   <body>
-    <nav id="header" class="navbar navbar-expand navbar-light">
-      <div class="container">
-        <a class="navbar-brand" href="/photo-scanner/">Photo Scanner</a>
-        <div class="navbar-nav">
-          <select id="lang" class="form-control form-control-sm">
-            <option value="">Language</option>
-            <option value="en">English</option>
-            <option value="ja" selected>日本語</option>
-          </select>
-          <button title="ダークモード切替" onclick="toggleDarkMode()" class="ml-2 close">🌓</button>
-          <button title="概要" class="ml-2 close event-open" data-target="#overview" aria-label="概要">
-            <span aria-hidden="true">?</span>
-          </button>
+    <header>
+      <nav id="header" class="navbar navbar-expand navbar-light">
+        <div class="container">
+          <a class="navbar-brand" href="/photo-scanner/">Photo Scanner</a>
+          <div class="navbar-nav">
+            <select id="lang" class="form-control form-control-sm">
+              <option value="">Language</option>
+              <option value="en">English</option>
+              <option value="ja" selected>日本語</option>
+            </select>
+            <button title="ダークモード切替" onclick="toggleDarkMode()" class="ml-2 close">🌓</button>
+            <button title="概要" class="ml-2 close event-open" data-target="#overview" aria-label="概要">
+              <span aria-hidden="true">?</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
-    <div class="container-fluid">
+      </nav>
+    </header>
+    <main class="container-fluid">
       <div class="alert alert-info alert-dismmisible text-center" role="alert" id="overview">
         <button type="button" class="close event-close ml-3 mb-3" data-target="#overview" aria-label="閉じる">
           <span aria-hidden="true">&times;</span>
@@ -68,10 +70,15 @@
         <p>Photo Scanner はスマホや PC で文書のスキャンを効率化するサービスです。
         カメラで撮影した写真を、スキャナー画像のように自動で補正します。
         </p>
-        <div>
-          &copy; 2020 <a href="https://github.com/marmooo">marmooo</a>.
-          Please see <a href="/terms/">Term of Service</a>.
-        </div>
+        <footer>
+          <div>
+            <a class="px-1" href="/">Home</a>
+            <a class="px-1" href="/terms/">Terms</a>
+            <a class="px-1" href="https://github.com/marmooo/photo-scanner">Contact</a>
+          </div>
+          <div class="text-muted">&copy; <a href="https://github.com/marmooo">marmooo</a>
+          </div>
+        </footer>
       </div>
       <div class="row">
         <div class="col-md-7">
@@ -232,33 +239,33 @@
           <div id="output"></div>
         </div>
       </div>
-    </div>
-    <canvas id="snapCanvas" hidden></canvas>
-    <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-body">
-            <img id="previewImage" src="/photo-scanner/img/loading.gif" alt="preview">
-          </div>
-      </div>
-    </div>
-    <template id="img-box">
-      <style>
-        .thumbnail { position:relative; float:left; padding:5px; }
-        img { transform-origin:top left; }
-        .rotate90  { transform:rotate(90deg) translateY(-100%); }
-        .rotate180 { transform:rotate(180deg) translate(-100%, -100%); }
-        .rotate270 { transform:rotate(270deg) translate(-100%); }
-        .toolbar { position:absolute; top:0; left:0; padding:10px; }
-        svg { cursor: pointer; }
-      </style>
-      <div class="thumbnail">
-        <img src="/photo-scanner/img/loading.gif" width="150" height="150" alt="thumbnail" data-angle="0">
-        <div class="toolbar">
-          <svg class="close" width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
-          <svg class="rotate" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M15.55 5.55L11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10l4.55-4.45zM19.93 11c-.17-1.39-.72-2.73-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47h2.02zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03zm3.89-2.42l1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48z"/></svg>
+      <canvas id="snapCanvas" hidden></canvas>
+      <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-body">
+              <img id="previewImage" src="/photo-scanner/img/loading.gif" alt="preview">
+            </div>
         </div>
       </div>
-    </template>
+      <template id="img-box">
+        <style>
+          .thumbnail { position:relative; float:left; padding:5px; }
+          img { transform-origin:top left; }
+          .rotate90  { transform:rotate(90deg) translateY(-100%); }
+          .rotate180 { transform:rotate(180deg) translate(-100%, -100%); }
+          .rotate270 { transform:rotate(270deg) translate(-100%); }
+          .toolbar { position:absolute; top:0; left:0; padding:10px; }
+          svg { cursor: pointer; }
+        </style>
+        <div class="thumbnail">
+          <img src="/photo-scanner/img/loading.gif" width="150" height="150" alt="thumbnail" data-angle="0">
+          <div class="toolbar">
+            <svg class="close" width="24" height="24" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
+            <svg class="rotate" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M15.55 5.55L11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10l4.55-4.45zM19.93 11c-.17-1.39-.72-2.73-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47h2.02zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03zm3.89-2.42l1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48z"/></svg>
+          </div>
+        </div>
+      </template>
+    </main>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js" ></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" ></script>
