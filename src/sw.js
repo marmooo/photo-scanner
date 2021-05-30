@@ -1,4 +1,4 @@
-var CACHE_NAME = '2021-05-04 10:40';
+var CACHE_NAME = '2021-05-30 10:25';
 var urlsToCache = [
   '/photo-scanner/js/opencv.js',
   '/photo-scanner/js/index.js',
@@ -7,10 +7,8 @@ var urlsToCache = [
   '/photo-scanner/img/loading.gif',
   '/photo-scanner/denoise/model.json',
   '/photo-scanner/denoise/group1-shard1of1.bin',
-  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css',
-  'https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js',
-  'https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js',
-  'https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js',
   'https://cdn.jsdelivr.net/npm/dropbox@9.6.0/dist/Dropbox-sdk.min.js',
   'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js',
 ];
