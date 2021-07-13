@@ -1,4 +1,4 @@
-rm -rf docs
-cp -r src docs
-minify --all --recursive src --output docs
+mkdir -p docs
+cp -r src/* docs
+minify -r src -o docs
 
