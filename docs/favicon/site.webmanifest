@@ -15,5 +15,6 @@
     ],
     "theme_color": "#ffffff",
     "background_color": "#ffffff",
+    "start_url": "https://marmooo.github.io/photo-scanner/",
     "display": "standalone"
 }
