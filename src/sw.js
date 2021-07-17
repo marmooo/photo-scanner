@@ -1,10 +1,11 @@
-var CACHE_NAME = '2021-07-17 13:25';
+var CACHE_NAME = '2021-07-17 13:30';
 var urlsToCache = [
   '/photo-scanner/js/opencv.js',
   '/photo-scanner/js/index.js',
   '/photo-scanner/js/worker.js',
   '/photo-scanner/img/scanner.svg',
   '/photo-scanner/img/loading.gif',
+  '/photo-scanner/favicon/favicon-48x48.png',
   '/photo-scanner/denoise/model.json',
   '/photo-scanner/denoise/group1-shard1of1.bin',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css',
