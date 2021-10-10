@@ -268,6 +268,9 @@ if (navigator.mediaDevices.getUserMedia === undefined) {
 cv.then((cv) => {
   document.getElementById("snapshot").onclick = snapshot;
   document.getElementById("clipboard").onclick = clipboardToThumbnail;
+  document.getElementById("selectImages").onclick = function () {
+    document.getElementById("inputImages").click();
+  };
 
   function syncVideo(video, options) {
     uploadCanvas.hidden = true;
@@ -298,7 +301,7 @@ cv.then((cv) => {
     syncVideo(video, videoOptions);
   };
 
-  document.getElementById("upload").onchange = function (event) {
+  document.getElementById("inputImages").onchange = function (event) {
     loadingMessage.innerText = "⌛ Loading image...";
     loadingMessage.hidden = false;
     cancelAnimationFrame(animationFrame);
@@ -688,7 +691,6 @@ cv.then((cv) => {
       loadingMessage.innerText = "⌛ Loading image...";
       loadingMessage.hidden = false;
       navigator.clipboard.read().then(function (images) {
-        let processed = false;
         for (let i = 0; i < images.length; i++) {
           const img = images[i];
           for (let j = 0; j < img.types.length; j++) {
@@ -698,7 +700,6 @@ cv.then((cv) => {
                 alert("Sorry, SVG is probably not convertible.");
               }
               img.getType(type).then(function (blob) {
-                processed = true;
                 cancelAnimationFrame(animationFrame);
                 uploadCanvas.hidden = false;
                 videoCanvas.hidden = true;
@@ -786,11 +787,15 @@ cv.then((cv) => {
 });
 
 loadConfig();
-const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  return new bootstrap.Tooltip(tooltipTriggerEl)
+const tooltipTriggerList = [].slice.call(
+  document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+);
+tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl);
 });
-const previewModal = new bootstrap.Modal(document.getElementById("previewModal"));
+const previewModal = new bootstrap.Modal(
+  document.getElementById("previewModal"),
+);
 
 document.getElementById("config").addEventListener("change", function () {
   localStorage.setItem("resolution", this.resolution.selectedIndex);
