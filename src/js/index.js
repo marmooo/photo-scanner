@@ -284,7 +284,7 @@ cv.then((cv) => {
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
-      loadingMessage.innerText = "⌛ Loading video...";
+      loadingMessage.textContent = "⌛ Loading video...";
       animationFrame = requestAnimationFrame(tickVideo);
     }).catch(function (_err) {
       // alert(err.message);
@@ -302,7 +302,7 @@ cv.then((cv) => {
   };
 
   document.getElementById("inputImages").onchange = function (event) {
-    loadingMessage.innerText = "⌛ Loading image...";
+    loadingMessage.textContent = "⌛ Loading image...";
     loadingMessage.hidden = false;
     cancelAnimationFrame(animationFrame);
     uploadCanvas.hidden = false;
@@ -688,7 +688,7 @@ cv.then((cv) => {
 
   function clipboardToThumbnail() {
     try {
-      loadingMessage.innerText = "⌛ Loading image...";
+      loadingMessage.textContent = "⌛ Loading image...";
       loadingMessage.hidden = false;
       navigator.clipboard.read().then(function (images) {
         for (let i = 0; i < images.length; i++) {
@@ -729,7 +729,7 @@ cv.then((cv) => {
   }
 
   document.body.onpaste = function (event) {
-    loadingMessage.innerText = "⌛ Loading image...";
+    loadingMessage.textContent = "⌛ Loading image...";
     loadingMessage.hidden = false;
     const items =
       (event.clipboardData || event.originalEvent.clipboardData).items;
