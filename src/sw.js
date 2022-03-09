@@ -1,4 +1,4 @@
-var CACHE_NAME = '2021-12-07 09:35';
+var CACHE_NAME = '2022-03-10 00:45';
 var urlsToCache = [
   "/photo-scanner/js/opencv.js",
   "/photo-scanner/js/index.js",
@@ -9,7 +9,7 @@ var urlsToCache = [
   "/photo-scanner/denoise/model.json",
   "/photo-scanner/denoise/group1-shard1of1.bin",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@9.6.0/dist/Dropbox-sdk.min.js",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0/dist/tf.min.js",
 ];
