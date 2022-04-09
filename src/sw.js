@@ -1,4 +1,4 @@
-var CACHE_NAME = '2022-03-22 09:00';
+var CACHE_NAME = '2022-04-09 11:16';
 var urlsToCache = [
   "/photo-scanner/js/opencv.js",
   "/photo-scanner/js/index.js",
@@ -11,7 +11,7 @@ var urlsToCache = [
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.9.0/dist/tf.min.js",
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.15.0/dist/tf.min.js",
 ];
 
 self.addEventListener("install", function (event) {
