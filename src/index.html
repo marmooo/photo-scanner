@@ -65,6 +65,9 @@
       </nav>
     </header>
     <main class="container-fluid">
+      <noscript>
+        <div class="alert alert-warning">Please enable JavaScript</div>
+      </noscript>
       <div class="container alert alert-info alert-dismissible text-center" role="alert" id="overview">
         <button type="button" class="btn-close event-close ms-3" data-target="#overview" aria-label="close"></button>
         <p>Photo Scanner is a service that streamlines document scanning on smartphones and PCs.
@@ -82,9 +85,6 @@
       </div>
       <div class="row">
         <div class="col-md-7 pb-3">
-          <noscript>
-            <div class="alert alert-warning">Please enable JavaScript</div>
-          </noscript>
           <div class="alert alert-warning text-center" id="loadingMessage">
             <p>Specify the image you want to scan by either reading the clipboard, uploading it, or shooting with the camera.</p>
             <img class="img-fluid" src="/photo-scanner/img/scanner.svg" width="300" height="300" alt="scanner">
