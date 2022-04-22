@@ -1,4 +1,4 @@
-var CACHE_NAME = '2022-04-21 08:10';
+var CACHE_NAME = '2022-04-23 08:06';
 var urlsToCache = [
   "/photo-scanner/js/opencv.js",
   "/photo-scanner/js/index.js",
