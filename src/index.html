@@ -56,7 +56,7 @@
               <option value="en" selected>English</option>
               <option value="ja">日本語</option>
             </select>
-            <button title="toggle dark-mode" onclick="toggleDarkMode()" class="fs-4 btn p-0 ms-1">🌓</button>
+            <button title="toggle dark-mode" id="toggleDarkMode" class="fs-4 btn p-0 ms-1">🌓</button>
             <button title="overview" class="btn fs-4 fw-bold p-0 ms-1 event-open" data-target="#overview" aria-label="overview">
               <span aria-hidden="true">？</span>
             </button>
@@ -89,7 +89,7 @@
             <p>Specify the image you want to scan by either reading the clipboard, uploading it, or shooting with the camera.</p>
             <img class="img-fluid" src="/photo-scanner/img/scanner.svg" width="300" height="300" alt="scanner">
           </div>
-          <canvas onclick="scrollIntoView()" id="videoCanvas" class="w-100" hidden></canvas>
+          <canvas id="videoCanvas" class="w-100" hidden></canvas>
           <canvas id="uploadCanvas" class="w-100" hidden></canvas>
           <div class="text-center">
             <button title="load from clipboard" id="clipboard" class="btn p-0 mx-2" data-bs-toggle="tooltip">
@@ -212,7 +212,7 @@
               <h6 class="card-header">Clear settings</h6>
               <div class="card-body">
                 <p>Please be careful about personal information in an environment used by an unspecified number of users.</p>
-                <button onclick="clearConfig()" class="btn btn-primary">Clear Settings</button>
+                <button id="clearConfig" class="btn btn-primary">Clear Settings</button>
               </div>
             </div>
           </div>
