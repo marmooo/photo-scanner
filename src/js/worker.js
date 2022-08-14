@@ -1,15 +1,3 @@
-importScripts("/photo-scanner/js/opencv.js");
-
-self.addEventListener("message", function (event) {
-  const d = event.data;
-  if (d.type == "affineImage") {
-    d.type = "result";
-    console.log(d.src);
-    d.src = affineImage(d.src, d.denoise); // TODO: なぜか動かない
-    postMessage(event.data);
-  }
-});
-
 function findApprox(src) {
   const dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
   // 2値化
@@ -139,6 +127,18 @@ function denoiseImage(src) {
   return src;
 }
 
+importScripts("/photo-scanner/js/opencv.js");
+
+self.addEventListener("message", (event) => {
+  const d = event.data;
+  if (d.type == "affineImage") {
+    d.type = "result";
+    console.log(d.src);
+    d.src = affineImage(d.src, d.denoise); // TODO: なぜか動かない
+    postMessage(event.data);
+  }
+});
+
 // let model;  // wasm だと resizeNearestNeighbour が使えない
 // tf.setBackend('wasm').then(function() {
 //   tf.loadLayersModel('denoise/model.json')
@@ -154,7 +154,8 @@ tf.loadLayersModel("/photo-scanner/denoise/model.json")
 function deepDenoiseImage(src) {
   try {
     const dst = new cv.Mat();
-    cv.resize(src, dst, new cv.Size(256, 256), 0, 0, cv.INTER_NEAREST); // リサイズしないと WebGL の上限に抵触
+    // リサイズしないと WebGL の上限に抵触
+    cv.resize(src, dst, new cv.Size(256, 256), 0, 0, cv.INTER_NEAREST);
     const score = tf.tidy(() => {
       const channels = 3;
       // let input = tf.browser.fromPixels(src, channels).expandDims(0)
