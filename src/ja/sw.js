@@ -1,4 +1,4 @@
-var CACHE_NAME = "2023-05-21 14:10";
+var CACHE_NAME = "2023-06-23 10:30";
 var urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
@@ -10,7 +10,6 @@ var urlsToCache = [
   "/photo-scanner/denoise/model.json",
   "/photo-scanner/denoise/group1-shard1of1.bin",
   "/photo-scanner/favicon/favicon.svg",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.6.0/dist/tf.min.js",
