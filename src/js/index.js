@@ -14,7 +14,7 @@ function loadConfig() {
     "serverAddress",
   );
   if (localStorage.getItem("darkMode") == 1) {
-    document.body.dataset.theme = "dark";
+    document.documentElement.setAttribute("data-bs-theme", "dark");
   }
   if (localStorage.getItem("overview") == 0) {
     document.getElementById("overview").hidden = true;
@@ -24,10 +24,10 @@ function loadConfig() {
 function toggleDarkMode() {
   if (localStorage.getItem("darkMode") == 1) {
     localStorage.setItem("darkMode", 0);
-    delete document.documentElement.dataset.theme;
+    document.documentElement.setAttribute("data-bs-theme", "light");
   } else {
     localStorage.setItem("darkMode", 1);
-    document.documentElement.dataset.theme = "dark";
+    document.documentElement.setAttribute("data-bs-theme", "dark");
   }
 }
 
