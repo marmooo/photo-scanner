@@ -1,4 +1,4 @@
-var CACHE_NAME = "2023-07-15 17:34";
+var CACHE_NAME = "2023-07-23 08:38";
 var urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
@@ -12,7 +12,7 @@ var urlsToCache = [
   "/photo-scanner/favicon/favicon.svg",
   "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.8.0/dist/tf.min.js",
+  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.9.0/dist/tf.min.js",
 ];
 
 self.addEventListener("install", function (event) {
