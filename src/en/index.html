@@ -61,9 +61,7 @@
             </select>
             <button title="toggle dark-mode" id="toggleDarkMode" class="fs-4 btn p-0 ms-1" type="button">🌓</button>
             <button title="overview" class="btn fs-4 fw-bold p-0 ms-1 event-open" type="button"
-              data-target="#overview" aria-label="overview">
-              <span aria-hidden="true">？</span>
-            </button>
+              data-bs-target="#overview" aria-label="overview">？</button>
           </div>
         </div>
       </nav>
@@ -74,7 +72,7 @@
       </noscript>
       <div class="container alert alert-info alert-dismissible text-center" role="alert" id="overview">
         <button class="btn-close event-close ms-3" type="button"
-          data-target="#overview" aria-label="close"></button>
+          data-bs-target="#overview" aria-label="close"></button>
         <p>Photo Scanner is a service that streamlines document scanning on smartphones and PCs.
         The photo taken by the camera is automatically corrected like a scanner image.
         </p>
@@ -246,12 +244,12 @@
           <div id="dropboxAlert" class="py-3 alert alert-warning alert-dismissible my-3" role="alert" hidden>
             Please specify the App key on the setting screen
             <button class="btn-close event-close" type="button"
-              data-target="#dropboxAlert" aria-label="close"></button>
+              data-bs-target="#dropboxAlert" aria-label="close"></button>
           </div>
           <div id="serverAlert" class="py-3 alert alert-warning alert-dismissible my-3" role="alert" hidden>
             Please specify the server address on the setting screen
             <button class="btn-close event-close" type="button"
-              data-target="#serverAlert" aria-label="close"></button>
+              data-bs-target="#serverAlert" aria-label="close"></button>
           </div>
           <div id="output"></div>
         </div>

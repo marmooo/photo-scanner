@@ -10,9 +10,8 @@ function loadConfig() {
   }
   config.filter.value = localStorage.getItem("filter");
   document.getElementById("clientId").value = localStorage.getItem("clientId");
-  document.getElementById("serverAddress").value = localStorage.getItem(
-    "serverAddress",
-  );
+  document.getElementById("serverAddress").value = localStorage
+    .getItem("serverAddress");
   if (localStorage.getItem("darkMode") == 1) {
     document.documentElement.setAttribute("data-bs-theme", "dark");
   }
@@ -61,8 +60,8 @@ function uploadDropbox() {
       const base64 =
         outputElement.children[i].shadowRoot.querySelector("img").src;
       dbx.filesUpload({ path: path, contents: base64ToArrayBuffer(base64) })
-        .then(function () {
-        }).catch(function (err) {
+        .then(() => {
+        }).catch((err) => {
           console.log(err);
           alert(err.error.error_summary);
         });
@@ -78,7 +77,7 @@ function uploadDropbox() {
 function base64ToArrayBuffer(base64) {
   base64 = base64.slice(base64.indexOf("base64,") + 7);
   const binaryString = window.atob(base64);
-  const len = binary_string.length;
+  const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
     bytes[i] = binaryString.charCodeAt(i);
@@ -111,8 +110,8 @@ function uploadServer() {
       method: "POST",
       body: formData,
       mode: "no-cors",
-    }).then(function () {
-    }).catch(function (err) {
+    }).then(() => {
+    }).catch((err) => {
       console.log(err);
       alert(err);
     });
@@ -162,64 +161,64 @@ function parseQueryString(str) {
   return ret;
 }
 
-document.getElementById("reloadApp").addEventListener("click", function (e) {
+document.getElementById("reloadApp").addEventListener("click", (event) => {
   e.preventDefault();
+  const baseUrl = event.currentTarget.dataset.href;
   const clientId = document.getElementById("clientId").value;
-  location.href = this.dataset.href + "&client_id=" + clientId;
-}, false);
+  location.href = baseUrl + "&client_id=" + clientId;
+});
 
-customElements.define(
-  "img-box",
-  class extends HTMLElement {
-    constructor() {
-      super();
-      const template = document.getElementById("img-box").content.cloneNode(
-        true,
-      );
-      template.querySelector("img").onclick = function () {
-        const img = document.getElementById("previewImage");
-        img.src = this.src;
-        img.className = this.className + " img-fluid";
-        previewModal.show();
-      };
-      template.querySelector(".close").onclick = function () {
-        this.parentNode.parentNode.parentNode.host.remove();
-      };
-      template.querySelector(".rotate").onclick = function () {
-        // https://stackoverflow.com/questions/16794310/rotate-image-with-javascript
-        const root = this.parentNode.parentNode;
-        const img = root.querySelector("img");
-        const angle = (parseInt(img.dataset.angle) + 90) % 360;
-        if (angle % 180 == 0) {
-          root.style.width = img.width + "px";
-          root.style.height = img.height + "px";
-        } else {
-          root.style.width = img.height + "px";
-          root.style.height = img.width + "px";
-        }
-        img.className = "rotate" + angle;
-        img.dataset.angle = angle;
-      };
-      this.attachShadow({ mode: "open" }).appendChild(template);
-    }
-  },
-);
+class ImageBox extends HTMLElement {
+  constructor() {
+    super();
+    const template = document.getElementById("img-box")
+      .content.cloneNode(true);
+    template.querySelector("img").onclick = (event) => {
+      const img = document.getElementById("previewImage");
+      img.src = event.currentTarget.src;
+      img.className = event.currentTarget.className + " img-fluid";
+      previewModal.show();
+    };
+    template.querySelector(".close").onclick = (event) => {
+      event.currentTarget.parentNode.parentNode.parentNode.host.remove();
+    };
+    template.querySelector(".rotate").onclick = (event) => {
+      // https://stackoverflow.com/questions/16794310/rotate-image-with-javascript
+      const root = event.currentTarget.parentNode.parentNode;
+      const img = root.querySelector("img");
+      const angle = (parseInt(img.dataset.angle) + 90) % 360;
+      if (angle % 180 == 0) {
+        root.style.width = img.width + "px";
+        root.style.height = img.height + "px";
+      } else {
+        root.style.width = img.height + "px";
+        root.style.height = img.width + "px";
+      }
+      img.className = "rotate" + angle;
+      img.dataset.angle = angle;
+    };
+    this.attachShadow({ mode: "open" }).appendChild(template);
+  }
+}
+customElements.define("img-box", ImageBox);
 
 function initializeEvents() {
   const closeButtons = document.getElementsByClassName("event-close");
   for (let i = 0; i < closeButtons.length; i++) {
-    closeButtons[i].addEventListener("click", function () {
-      document.querySelector(this.dataset.target).hidden = true;
+    closeButtons[i].addEventListener("click", (event) => {
+      const target = event.currentTarget.getAttribute("data-bs-target");
+      document.querySelector(target).hidden = true;
     });
   }
   const openButtons = document.getElementsByClassName("event-open");
   for (let i = 0; i < openButtons.length; i++) {
-    openButtons[i].addEventListener("click", function () {
-      document.querySelector(this.dataset.target).hidden = false;
+    openButtons[i].addEventListener("click", (event) => {
+      const target = event.currentTarget.getAttribute("data-bs-target");
+      document.querySelector(target).hidden = false;
     });
   }
   const langSelect = document.getElementById("lang");
-  langSelect.onchange = function () {
+  langSelect.onchange = () => {
     const lang = langSelect.options[langSelect.selectedIndex].value;
     location.href = "/photo-scanner/" + lang;
   };
@@ -251,7 +250,7 @@ const outputElement = document.getElementById("output");
 // });
 
 if (navigator.mediaDevices.getUserMedia === undefined) {
-  navigator.mediaDevices.getUserMedia = function (constraints) {
+  navigator.mediaDevices.getUserMedia = (constraints) => {
     const getUserMedia = navigator.webkitGetUserMedia ||
       navigator.mozGetUserMedia;
     if (!getUserMedia) {
@@ -268,7 +267,7 @@ if (navigator.mediaDevices.getUserMedia === undefined) {
 cv.then((cv) => {
   document.getElementById("snapshot").onclick = snapshot;
   document.getElementById("clipboard").onclick = clipboardToThumbnail;
-  document.getElementById("selectImages").onclick = function () {
+  document.getElementById("selectImages").onclick = () => {
     document.getElementById("inputImages").click();
   };
 
@@ -279,20 +278,20 @@ cv.then((cv) => {
         camera.stop();
       });
     }
-    navigator.mediaDevices.getUserMedia(options).then(function (stream) {
+    navigator.mediaDevices.getUserMedia(options).then((stream) => {
       videoCanvas.hidden = false;
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
       loadingMessage.textContent = "⌛ Loading video...";
       animationFrame = requestAnimationFrame(tickVideo);
-    }).catch(function (_err) {
+    }).catch((_err) => {
       // alert(err.message);
     });
   }
   syncVideo(video, videoOptions);
 
-  document.getElementById("facingMode").onclick = function () {
+  document.getElementById("facingMode").onclick = () => {
     if (videoOptions.video.facingMode == "user") {
       videoOptions.video.facingMode = "environment";
     } else {
@@ -301,20 +300,20 @@ cv.then((cv) => {
     syncVideo(video, videoOptions);
   };
 
-  document.getElementById("inputImages").onchange = function (event) {
+  document.getElementById("inputImages").onchange = (event) => {
     loadingMessage.textContent = "⌛ Loading image...";
     loadingMessage.hidden = false;
     cancelAnimationFrame(animationFrame);
     uploadCanvas.hidden = false;
     videoCanvas.hidden = true;
-    const files = event.target.files;
+    const files = event.currentTarget.files;
     for (let i = 0; i < files.length; i++) {
       if (files[i].type.startsWith("image/")) {
         if (files[i].type.startsWith("image/svg")) {
           alert("Sorry, SVG is probably not convertible.");
         }
         const img = new Image();
-        img.onload = function () {
+        img.onload = () => {
           uploadCanvas.width = img.width;
           uploadCanvas.height = img.height;
           uploadCanvas.getContext("2d").drawImage(
@@ -663,7 +662,7 @@ cv.then((cv) => {
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
       animationFrame = requestAnimationFrame(tickCapture);
-    }).catch(function (_err) {
+    }).catch((_err) => {
       // alert(err.message);
     });
   }
@@ -690,7 +689,7 @@ cv.then((cv) => {
     try {
       loadingMessage.textContent = "⌛ Loading image...";
       loadingMessage.hidden = false;
-      navigator.clipboard.read().then(function (images) {
+      navigator.clipboard.read().then((images) => {
         for (let i = 0; i < images.length; i++) {
           const img = images[i];
           for (let j = 0; j < img.types.length; j++) {
@@ -699,12 +698,12 @@ cv.then((cv) => {
               if (type.startsWith("image/svg")) {
                 alert("Sorry, SVG is probably not convertible.");
               }
-              img.getType(type).then(function (blob) {
+              img.getType(type).then((blob) => {
                 cancelAnimationFrame(animationFrame);
                 uploadCanvas.hidden = false;
                 videoCanvas.hidden = true;
                 const img = new Image();
-                img.onload = function () {
+                img.onload = () => {
                   uploadCanvas.width = img.width;
                   uploadCanvas.height = img.height;
                   uploadCanvas.getContext("2d").drawImage(
@@ -728,7 +727,7 @@ cv.then((cv) => {
     }
   }
 
-  document.body.onpaste = function (event) {
+  document.body.onpaste = (event) => {
     loadingMessage.textContent = "⌛ Loading image...";
     loadingMessage.hidden = false;
     const items =
@@ -741,13 +740,13 @@ cv.then((cv) => {
     }
     if (blob !== null) {
       const reader = new FileReader();
-      reader.onload = function (event) {
+      reader.onload = (event) => {
         loadingMessage.hidden = true;
         cancelAnimationFrame(animationFrame);
         uploadCanvas.hidden = false;
         videoCanvas.hidden = true;
         const img = new Image();
-        img.onload = function () {
+        img.onload = () => {
           uploadCanvas.width = img.width;
           uploadCanvas.height = img.height;
           uploadCanvas.getContext("2d").drawImage(
@@ -760,7 +759,7 @@ cv.then((cv) => {
           loadingMessage.hidden = true;
           snapToThumbnail(uploadCanvas);
         };
-        img.src = event.target.result;
+        img.src = event.currentTarget.result;
       };
       reader.readAsDataURL(blob);
     }
@@ -790,23 +789,27 @@ loadConfig();
 const tooltipTriggerList = [].slice.call(
   document.querySelectorAll('[data-bs-toggle="tooltip"]'),
 );
-tooltipTriggerList.map(function (tooltipTriggerEl) {
+tooltipTriggerList.map((tooltipTriggerEl) => {
   return new bootstrap.Tooltip(tooltipTriggerEl);
 });
 const previewModal = new bootstrap.Modal(
   document.getElementById("previewModal"),
 );
 
-document.getElementById("config").addEventListener("change", function () {
-  localStorage.setItem("resolution", this.resolution.selectedIndex);
-  localStorage.setItem("filter", this.filter.value);
-  localStorage.setItem("clientId", document.getElementById("clientId").value);
-  localStorage.setItem(
-    "serverAddress",
-    document.getElementById("serverAddress").value,
-  );
+document.getElementById("config").addEventListener("change", (event) => {
+  const name = event.currentTarget.name;
+  switch (name) {
+    case "resolution":
+      localStorage.setItem(name, event.currentTarget.selectedIndex);
+      break;
+    case "filter":
+    case "clientId":
+    case "serverAddress":
+      localStorage.setItem(name, event.currentTarget.value);
+      break;
+  }
 });
-document.getElementById("overview").addEventListener("click", function () {
+document.getElementById("overview").addEventListener("click", () => {
   localStorage.setItem("overview", 0);
 });
 document.getElementById("clearConfig").onclick = clearConfig;
