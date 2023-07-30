@@ -238,7 +238,7 @@ const outputElement = document.getElementById("output");
 // const worker = new Worker('/photo-scanner/js/worker.js');
 // worker.addEventListener('message', (event) => {
 //   if (event.data.type == 'result') {
-//     let src = cv.matFromImageData(event.data.src);
+//     const src = cv.matFromImageData(event.data.src);
 //     cv.imshow('snapCanvas', src);
 //     src.delete();
 //     const thumbnail = document.createElement('img-box');
@@ -301,8 +301,8 @@ cv.then((cv) => {
   };
 
   document.getElementById("inputImages").onchange = (event) => {
-    loadingMessage.textContent = "⌛ Loading image...";
     loadingMessage.hidden = false;
+    loadingMessage.textContent = "⌛ Loading image...";
     cancelAnimationFrame(animationFrame);
     uploadCanvas.hidden = false;
     videoCanvas.hidden = true;
@@ -312,24 +312,34 @@ cv.then((cv) => {
         if (files[i].type.startsWith("image/svg")) {
           alert("Sorry, SVG is probably not convertible.");
         }
-        const img = new Image();
-        img.onload = () => {
-          uploadCanvas.width = img.width;
-          uploadCanvas.height = img.height;
-          uploadCanvas.getContext("2d").drawImage(
-            img,
-            0,
-            0,
-            uploadCanvas.width,
-            uploadCanvas.height,
-          );
-          loadingMessage.hidden = true;
-          snapToThumbnail(uploadCanvas);
-        };
-        img.src = URL.createObjectURL(files[i]);
+        const url = URL.createObjectURL(files[i]);
+        loadImage(uploadCanvas, url);
       }
     }
   };
+
+  function drawRect(videoCanvas) {
+    const src = cv.imread(videoCanvas);
+    const dst = new cv.Mat();
+    cv.resize(
+      src,
+      dst,
+      new cv.Size(videoCanvas.width / 2, videoCanvas.height / 2),
+      0,
+      0,
+      cv.INTER_NEAREST,
+    ); // リサイズしないと重い
+    const approx = findApprox(dst);
+    if (approx.total() == 4) {
+      cv.imshow("videoCanvas", dst);
+      document.getElementById("snapshot").style.fill = "blue";
+    } else {
+      document.getElementById("snapshot").style.fill = "black";
+    }
+    approx.delete();
+    src.delete();
+    dst.delete();
+  }
 
   function tickVideo() {
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
@@ -343,27 +353,7 @@ cv.then((cv) => {
         videoCanvas.width,
         videoCanvas.height,
       );
-      // return;
-      const src = cv.imread(videoCanvas);
-      const dst = new cv.Mat();
-      cv.resize(
-        src,
-        dst,
-        new cv.Size(videoCanvas.width / 2, videoCanvas.height / 2),
-        0,
-        0,
-        cv.INTER_NEAREST,
-      ); // リサイズしないと重い
-      const approx = findApprox(dst);
-      if (approx.total() == 4) {
-        cv.imshow("videoCanvas", dst);
-        document.getElementById("snapshot").style.fill = "blue";
-      } else {
-        document.getElementById("snapshot").style.fill = "black";
-      }
-      approx.delete();
-      src.delete();
-      dst.delete();
+      drawRect(videoCanvas);
     }
     animationFrame = requestAnimationFrame(tickVideo);
   }
@@ -685,6 +675,24 @@ cv.then((cv) => {
     animationFrame = requestAnimationFrame(tickCapture);
   }
 
+  function loadImage(uploadCanvas, url) {
+    const img = new Image();
+    img.onload = () => {
+      loadingMessage.hidden = true;
+      uploadCanvas.width = img.naturalWidth;
+      uploadCanvas.height = img.naturalHeight;
+      uploadCanvas.getContext("2d").drawImage(
+        img,
+        0,
+        0,
+        uploadCanvas.width,
+        uploadCanvas.height,
+      );
+      snapToThumbnail(uploadCanvas);
+    };
+    img.src = url;
+  }
+
   function clipboardToThumbnail() {
     try {
       loadingMessage.textContent = "⌛ Loading image...";
@@ -702,21 +710,8 @@ cv.then((cv) => {
                 cancelAnimationFrame(animationFrame);
                 uploadCanvas.hidden = false;
                 videoCanvas.hidden = true;
-                const img = new Image();
-                img.onload = () => {
-                  uploadCanvas.width = img.width;
-                  uploadCanvas.height = img.height;
-                  uploadCanvas.getContext("2d").drawImage(
-                    img,
-                    0,
-                    0,
-                    uploadCanvas.width,
-                    uploadCanvas.height,
-                  );
-                  loadingMessage.hidden = true;
-                  snapToThumbnail(uploadCanvas);
-                };
-                img.src = URL.createObjectURL(blob);
+                const url = URL.createObjectURL(blob);
+                loadImage(uploadCanvas, url);
               });
             }
           }
@@ -741,25 +736,11 @@ cv.then((cv) => {
     if (blob !== null) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        loadingMessage.hidden = true;
         cancelAnimationFrame(animationFrame);
         uploadCanvas.hidden = false;
         videoCanvas.hidden = true;
-        const img = new Image();
-        img.onload = () => {
-          uploadCanvas.width = img.width;
-          uploadCanvas.height = img.height;
-          uploadCanvas.getContext("2d").drawImage(
-            img,
-            0,
-            0,
-            uploadCanvas.width,
-            uploadCanvas.height,
-          );
-          loadingMessage.hidden = true;
-          snapToThumbnail(uploadCanvas);
-        };
-        img.src = event.currentTarget.result;
+        const url = event.currentTarget.result;
+        loadImage(uploadCanvas, url);
       };
       reader.readAsDataURL(blob);
     }
