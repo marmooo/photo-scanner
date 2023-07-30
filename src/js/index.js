@@ -136,7 +136,7 @@ function parseQueryString(str) {
     return ret;
   }
 
-  str.split("&").forEach(function (param) {
+  str.split("&").forEach((param) => {
     const parts = param.replace(/\+/g, " ").split("=");
     // Firefox (pre 40) decodes `%3D` to `=`
     // https://github.com/sindresorhus/query-string/pull/37
@@ -236,7 +236,7 @@ const loadingMessage = document.getElementById("loadingMessage");
 const outputElement = document.getElementById("output");
 
 // const worker = new Worker('/photo-scanner/js/worker.js');
-// worker.addEventListener('message', function(event) {
+// worker.addEventListener('message', (event) => {
 //   if (event.data.type == 'result') {
 //     let src = cv.matFromImageData(event.data.src);
 //     cv.imshow('snapCanvas', src);
@@ -258,7 +258,7 @@ if (navigator.mediaDevices.getUserMedia === undefined) {
         new Error("getUserMedia is not implemented in this browser"),
       );
     }
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       getUserMedia.call(navigator, constraints, resolve, reject);
     });
   };
@@ -386,7 +386,7 @@ cv.then((cv) => {
       }
     }
     const minmax = [minPos, maxPos];
-    const idx = [0, 1, 2, 3].filter(function (e) {
+    const idx = [0, 1, 2, 3].filter((e) => {
       return !minmax.includes(e);
     });
     let second;
@@ -556,7 +556,7 @@ cv.then((cv) => {
   }
 
   // let model;  // wasm だと resizeNearestNeighbour が使えない
-  // tf.setBackend('wasm').then(function() {
+  // tf.setBackend('wasm').then(() => {
   //   tf.loadLayersModel('/photo-scanner/denoise/model.json')
   //     .then(pretrainedModel => {
   //       model = pretrainedModel;
@@ -653,11 +653,11 @@ cv.then((cv) => {
   function syncCapture(video, options) {
     uploadCanvas.hidden = true;
     if (video.srcObject) {
-      video.srcObject.getVideoTracks().forEach(function (camera) {
+      video.srcObject.getVideoTracks().forEach((camera) => {
         camera.stop();
       });
     }
-    navigator.mediaDevices.getUserMedia(options).then(function (stream) {
+    navigator.mediaDevices.getUserMedia(options).then((stream) => {
       video.srcObject = stream;
       video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
       video.play();
