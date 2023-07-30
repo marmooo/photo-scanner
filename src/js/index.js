@@ -176,7 +176,8 @@ class ImageBox extends HTMLElement {
     template.querySelector("img").onclick = (event) => {
       const img = document.getElementById("previewImage");
       img.src = event.currentTarget.src;
-      img.className = event.currentTarget.className + " img-fluid";
+      img.width = event.target.naturalWidth;
+      img.height = event.target.naturalHeight;
       previewModal.show();
     };
     template.querySelector(".close").onclick = (event) => {
@@ -226,6 +227,7 @@ function initializeEvents() {
 initializeEvents();
 
 let animationFrame;
+let lastAnimated = 0;
 const snapCanvas = document.getElementById("snapCanvas");
 const uploadCanvas = document.getElementById("uploadCanvas");
 const video = document.createElement("video");
@@ -342,18 +344,23 @@ cv.then((cv) => {
   }
 
   function tickVideo() {
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      loadingMessage.hidden = true;
-      videoCanvas.width = video.videoWidth;
-      videoCanvas.height = video.videoHeight;
-      videoCanvasContext.drawImage(
-        video,
-        0,
-        0,
-        videoCanvas.width,
-        videoCanvas.height,
-      );
-      drawRect(videoCanvas);
+    const fps = 30;
+    const t = Date.now();
+    if (lastAnimated + 1000 / fps < t) {
+      lastAnimated = t;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        loadingMessage.hidden = true;
+        videoCanvas.width = video.videoWidth;
+        videoCanvas.height = video.videoHeight;
+        videoCanvasContext.drawImage(
+          video,
+          0,
+          0,
+          videoCanvas.width,
+          videoCanvas.height,
+        );
+        drawRect(videoCanvas);
+      }
     }
     animationFrame = requestAnimationFrame(tickVideo);
   }
