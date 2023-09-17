@@ -10,7 +10,7 @@ const urlsToCache = [
   "/photo-scanner/denoise/model.json",
   "/photo-scanner/denoise/group1-shard1of1.bin",
   "/photo-scanner/favicon/favicon.svg",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0/dist/tf.min.js",
 ];
