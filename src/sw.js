@@ -1,4 +1,4 @@
-const CACHE_NAME = "2023-11-16 09:30";
+const CACHE_NAME = "2024-02-25 09:42";
 const urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
@@ -10,7 +10,7 @@ const urlsToCache = [
   "/photo-scanner/denoise/model.json",
   "/photo-scanner/denoise/group1-shard1of1.bin",
   "/photo-scanner/favicon/favicon.svg",
-  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js",
+  "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
   "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
   "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js",
 ];
