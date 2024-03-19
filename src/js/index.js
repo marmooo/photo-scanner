@@ -48,7 +48,7 @@ function downloadThumbnails() {
 }
 
 function uploadDropbox() {
-  const query = parseQueryString(window.location.hash);
+  const query = parseQueryString(location.hash);
   const clientId = document.getElementById("clientId").value;
   if (clientId != "" && query && query.accessToken) {
     const dbx = new Dropbox.Dropbox({
@@ -76,7 +76,7 @@ function uploadDropbox() {
 // https://stackoverflow.com/questions/40998274/
 function base64ToArrayBuffer(base64) {
   base64 = base64.slice(base64.indexOf("base64,") + 7);
-  const binaryString = window.atob(base64);
+  const binaryString = globalThis.atob(base64);
   const len = binaryString.length;
   const bytes = new Uint8Array(len);
   for (let i = 0; i < len; i++) {
