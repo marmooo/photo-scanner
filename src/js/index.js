@@ -1,3 +1,9 @@
+import {
+  Collapse,
+  Modal,
+  Tooltip,
+} from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/+esm";
+
 function clearConfig() {
   localStorage.clear();
 }
@@ -778,11 +784,10 @@ const tooltipTriggerList = [].slice.call(
   document.querySelectorAll('[data-bs-toggle="tooltip"]'),
 );
 tooltipTriggerList.map((tooltipTriggerEl) => {
-  return new bootstrap.Tooltip(tooltipTriggerEl);
+  return new Tooltip(tooltipTriggerEl);
 });
-const previewModal = new bootstrap.Modal(
-  document.getElementById("previewModal"),
-);
+const previewModal = new Modal(document.getElementById("previewModal"));
+new Collapse(document.getElementById("configToolbar"), { toggle: false });
 
 document.getElementById("config").addEventListener("change", (event) => {
   const name = event.currentTarget.name;
