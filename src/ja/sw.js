@@ -2,9 +2,9 @@ const CACHE_NAME = "2024-03-19 10:20";
 const urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
-  "/photo-scanner/js/opencv.js",
-  "/photo-scanner/js/index.js",
-  "/photo-scanner/js/worker.js",
+  "/photo-scanner/opencv.js",
+  "/photo-scanner/index.js",
+  "/photo-scanner/worker.js",
   "/photo-scanner/img/scanner.svg",
   "/photo-scanner/img/loading.gif",
   "/photo-scanner/denoise/model.json",

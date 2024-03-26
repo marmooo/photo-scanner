@@ -243,7 +243,7 @@ const videoCanvasContext = videoCanvas.getContext("2d");
 const loadingMessage = document.getElementById("loadingMessage");
 const outputElement = document.getElementById("output");
 
-// const worker = new Worker('/photo-scanner/js/worker.js');
+// const worker = new Worker('/photo-scanner/worker.js');
 // worker.addEventListener('message', (event) => {
 //   if (event.data.type == 'result') {
 //     const src = cv.matFromImageData(event.data.src);
