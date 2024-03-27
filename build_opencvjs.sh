@@ -16,4 +16,4 @@ python ${build_dir}/build_js.py ${opencv_dir}/build_wasm --build_wasm \
   --clean_build_dir \
   --opencv_dir ${opencv_dir} \
   --emscripten_dir ${emsdk_dir}/upstream/emscripten
-cp ${opencv_dir}/build_wasm/bin/opencv.js src/js
+cp ${opencv_dir}/build_wasm/bin/opencv.js src
