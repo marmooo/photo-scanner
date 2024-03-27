@@ -3,7 +3,7 @@ emsdk_dir=${base_dir}/emsdk  # 2.0.10
 opencv_dir=${base_dir}/opencv-4.9.0
 build_dir=${opencv_dir}/platforms/js
 
-source ${emsdk_dir}/emsdk_env.s
+source ${emsdk_dir}/emsdk_env.sh
 python ${build_dir}/build_js.py ${opencv_dir}/build_wasm --build_wasm \
   --cmake_option "\
     -DBUILD_ZLIB=OFF \
