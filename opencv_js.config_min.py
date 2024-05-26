@@ -13,8 +13,6 @@
 #     ],
 #     'Algorithm': [],
 # }
-# core = {'': ['absdiff', 'subtract', 'normalize', 'split', 'merge'],
-#       'Algorithm': []}
 core = {'': [],
       'Algorithm': []}
 
