@@ -1,30 +1,22 @@
-const https = require("https");
-const fs = require("fs");
-const express = require("express");
-const moment = require("moment");
-const multer = require("multer");
-const upload = multer();
-
-const serverOptions = {
-  key: fs.readFileSync("ssl/cert.key"),
-  cert: fs.readFileSync("ssl/cert.crt"),
+const handler = async (request) => {
+  if (request.method === "POST") {
+    const formData = await request.formData();
+    const files = formData.getAll("files");
+    for (const file of files) {
+      const arrayBuffer = await file.arrayBuffer();
+      const blob = new Uint8Array(arrayBuffer);
+      Deno.writeFileSync(`${dir}/${file.name}`, blob);
+    }
+    return new Response("OK", { status: 200 });
+  } else {
+    return new Response("Not Found", { status: 404 });
+  }
 };
-const port = 8080;
-const outdir = __dirname + "/files/";
-console.log(outdir);
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/photo-scanner", express.static("src"));
-app.post("/upload", upload.array("files"), (req, res) => {
-  req.files.forEach((file, i) => {
-    const filepath = outdir + moment().format("YYYY-MM-DD-HH-mm-ss-") + i +
-      ".jpg";
-    fs.writeFileSync(filepath, file.buffer);
-  });
-  res.send("ok");
-});
-const server = https.createServer(serverOptions, app);
-server.listen(port);
-// app.listen(port);
+const dir = "upload";
+
+Deno.serve({
+  port: 8000,
+  cert: Deno.readTextFileSync("./ssl/localhost.pem"),
+  key: Deno.readTextFileSync("./ssl/localhost-key.pem"),
+}, handler);
