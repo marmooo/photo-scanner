@@ -13,12 +13,14 @@
 #     ],
 #     'Algorithm': [],
 # }
-core = {'': ['absdiff', 'subtract', 'normalize', 'split', 'merge'],
+# core = {'': ['absdiff', 'subtract', 'normalize', 'split', 'merge'],
+#       'Algorithm': []}
+core = {'': [],
       'Algorithm': []}
 
 imgproc = {
     '': [
-        'Canny',
+        # 'Canny',
         # 'GaussianBlur',
         # 'Laplacian',
         # 'HoughLines',
@@ -27,10 +29,10 @@ imgproc = {
         # 'Scharr',
         # 'Sobel',
         'adaptiveThreshold',
-        'approxPolyDP',
-        'arcLength',
+        # 'approxPolyDP',
+        # 'arcLength',
         # 'bilateralFilter',
-        'blur',
+        # 'blur',
         # 'boundingRect',
         # 'boxFilter',
         # 'calcBackProject',
@@ -48,10 +50,10 @@ imgproc = {
         # 'createLineSegmentDetector',
         'cvtColor',
         # 'demosaicing',
-        'dilate',
+        # 'dilate',
         # 'distanceTransform',
         # 'distanceTransformWithLabels',
-        'drawContours',
+        # 'drawContours',
         # 'ellipse',
         # 'ellipse2Poly',
         # 'equalizeHist',
@@ -67,7 +69,7 @@ imgproc = {
         # 'getStructuringElement',
         # 'goodFeaturesToTrack',
         # 'grabCut',
-        #'initUndistortRectifyMap',  # 4.x: moved to calib3d
+        # #'initUndistortRectifyMap',  # 4.x: moved to calib3d
         # 'integral',
         # 'integral2',
         # 'isContourConvex',
@@ -75,7 +77,7 @@ imgproc = {
         # 'matchShapes',
         # 'matchTemplate',
         'medianBlur',
-        # 'minAreaRect',
+        'minAreaRect',
         # 'minEnclosingCircle',
         # 'moments',
         # 'morphologyEx',
@@ -85,10 +87,10 @@ imgproc = {
         # 'pyrUp',
         # 'rectangle',
         # 'remap',
-        'resize',
+        # 'resize',
         # 'sepFilter2D',
-        'threshold',
-        #'undistort',  # 4.x: moved to calib3d
+        # 'threshold',
+        # #'undistort',  # 4.x: moved to calib3d
         # 'warpAffine',
         'warpPerspective',
         # 'warpPolar',

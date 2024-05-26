@@ -1,8 +1,11 @@
 base_dir=${HOME}/workspace
-emsdk_dir=${base_dir}/emsdk  # 2.0.10
-opencv_dir=${base_dir}/opencv-4.9.0
+emsdk_dir=${base_dir}/emsdk  # 3.1.56
+opencv_dir=${base_dir}/opencv  # 4.9.0-dev
 build_dir=${opencv_dir}/platforms/js
 
+# You can specify the following options:
+  # --simd \
+  # --threads \
 source ${emsdk_dir}/emsdk_env.sh
 python ${build_dir}/build_js.py ${opencv_dir}/build_wasm --build_wasm \
   --cmake_option "\
@@ -13,7 +16,7 @@ python ${build_dir}/build_js.py ${opencv_dir}/build_wasm --build_wasm \
     -DBUILD_opencv_flann=OFF \
     -DBUILD_opencv_photo=OFF" \
   --config opencv_js.config_min.py \
+  --disable_single_file \
   --clean_build_dir \
   --opencv_dir ${opencv_dir} \
   --emscripten_dir ${emsdk_dir}/upstream/emscripten
-cp ${opencv_dir}/build_wasm/bin/opencv.js src
