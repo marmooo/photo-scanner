@@ -1,6 +1,6 @@
 base_dir=${HOME}/workspace
-emsdk_dir=${base_dir}/emsdk  # 3.1.56
-opencv_dir=${base_dir}/opencv  # 4.9.0-dev
+emsdk_dir=${base_dir}/emsdk  # 3.1.61
+opencv_dir=${base_dir}/opencv  # 4.10.0
 build_dir=${opencv_dir}/platforms/js
 
 # You can specify the following options:
