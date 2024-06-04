@@ -1,18 +1,39 @@
-const CACHE_NAME = "2024-03-27 00:10";
+const CACHE_NAME = "2024-06-04 11:00";
 const urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
-  "/photo-scanner/opencv.js",
+  "/photo-scanner/coi-serviceworker.js",
   "/photo-scanner/index.js",
-  "/photo-scanner/worker.js",
   "/photo-scanner/img/scanner.svg",
   "/photo-scanner/img/loading.gif",
-  "/photo-scanner/denoise/model.json",
-  "/photo-scanner/denoise/group1-shard1of1.bin",
+  "/photo-scanner/camera.mp3",
   "/photo-scanner/favicon/favicon.svg",
-  "https://cdn.jsdelivr.net/npm/dropbox@10.26.0/dist/Dropbox-sdk.min.js",
-  "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js",
+  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.6.1/dist/umd/index.min.js",
+  "https://cdn.jsdelivr.net/npm/dropbox@10.34.0/dist/Dropbox-sdk.min.js",
 ];
+
+importScripts(
+  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.6.1/dist/umd/index.min.js",
+);
+
+async function getOpenCVPath() {
+  const simdSupport = await wasmFeatureDetect.simd();
+  const threadsSupport = self.crossOriginIsolated &&
+    await wasmFeatureDetect.threads();
+  if (simdSupport && threadsSupport) {
+    return "/photo-scanner/opencv/threaded-simd/opencv_js.js";
+  } else if (simdSupport) {
+    return "/photo-scanner/opencv/simd/opencv_js.js";
+  } else if (threadsSupport) {
+    return "/photo-scanner/opencv/threads/opencv_js.js";
+  } else {
+    return "/photo-scanner/opencv/wasm/opencv_js.js";
+  }
+}
+
+const opencvPath = await getOpenCVPath();
+urlsToCache.push(opencvPath);
+urlsToCache.push(opencvPath.slice(0, -3) + ".wasm");
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

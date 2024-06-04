@@ -1,28 +1,15 @@
 import {
+  Carousel,
   Collapse,
-  Modal,
   Tooltip,
 } from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/+esm";
-
-function clearConfig() {
-  localStorage.clear();
-}
+import glfx from "https://cdn.jsdelivr.net/npm/glfx@0.0.4/+esm";
 
 function loadConfig() {
-  const config = document.getElementById("config");
-  const resolution = localStorage.getItem("resolution");
-  if (resolution) {
-    config.resolution.options[resolution].selected = true;
-  }
-  config.filter.value = localStorage.getItem("filter");
-  document.getElementById("clientId").value = localStorage.getItem("clientId");
-  document.getElementById("serverAddress").value = localStorage
-    .getItem("serverAddress");
+  configPanel.clientId.value = localStorage.getItem("clientId");
+  configPanel.serverAddress.value = localStorage.getItem("serverAddress");
   if (localStorage.getItem("darkMode") == 1) {
     document.documentElement.setAttribute("data-bs-theme", "dark");
-  }
-  if (localStorage.getItem("overview") == 0) {
-    document.getElementById("overview").hidden = true;
   }
 }
 
@@ -36,143 +23,47 @@ function toggleDarkMode() {
   }
 }
 
-function deleteThumbnails() {
-  while (outputElement.firstChild) {
-    outputElement.removeChild(outputElement.lastChild);
+function initLangSelect() {
+  const langSelect = document.getElementById("lang");
+  langSelect.onchange = () => {
+    const lang = langSelect.options[langSelect.selectedIndex].value;
+    location.href = `/photo-scanner/${lang}/`;
+  };
+}
+
+function initTooltip() {
+  for (const node of document.querySelectorAll('[data-bs-toggle="tooltip"]')) {
+    const tooltip = new Tooltip(node);
+    node.addEventListener("touchstart", () => tooltip.show());
+    node.addEventListener("touchend", () => tooltip.hide());
   }
 }
 
-function downloadThumbnails() {
-  for (let i = 0; i < outputElement.children.length; i++) {
-    const a = document.createElement("a");
-    a.download = i + ".jpg";
-    a.href = outputElement.children[i].shadowRoot.querySelector("img").src;
-    outputElement.appendChild(a);
-    a.click();
-    outputElement.removeChild(a);
-  }
-}
-
-function uploadDropbox() {
-  const query = parseQueryString(location.hash);
-  const clientId = document.getElementById("clientId").value;
-  if (clientId != "" && query && query.accessToken) {
-    const dbx = new Dropbox.Dropbox({
-      fetch: fetch,
-      accessToken: query.access_token,
-    });
-    for (let i = 0; i < outputElement.children.length; i++) {
-      const path = "/" + i + ".jpg";
-      const base64 =
-        outputElement.children[i].shadowRoot.querySelector("img").src;
-      dbx.filesUpload({ path: path, contents: base64ToArrayBuffer(base64) })
-        .then(() => {
-        }).catch((err) => {
-          console.log(err);
-          alert(err.error.error_summary);
-        });
-    }
+async function getOpenCVPath() {
+  const simdSupport = await wasmFeatureDetect.simd();
+  const threadsSupport = self.crossOriginIsolated &&
+    await wasmFeatureDetect.threads();
+  if (simdSupport && threadsSupport) {
+    return "/photo-scanner/opencv/threaded-simd/opencv_js.js";
+  } else if (simdSupport) {
+    return "/photo-scanner/opencv/simd/opencv_js.js";
+  } else if (threadsSupport) {
+    return "/photo-scanner/opencv/threads/opencv_js.js";
   } else {
-    const e = document.getElementById("dropboxAlert");
-    e.hidden = false;
-    e.scrollIntoView();
+    return "/photo-scanner/opencv/wasm/opencv_js.js";
   }
 }
 
-// https://stackoverflow.com/questions/40998274/
-function base64ToArrayBuffer(base64) {
-  base64 = base64.slice(base64.indexOf("base64,") + 7);
-  const binaryString = globalThis.atob(base64);
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
-function base64toJpg(base64) {
-  const bin = atob(base64.replace(/^.*,/, ""));
-  const buffer = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) {
-    buffer[i] = bin.charCodeAt(i);
-  }
-  return new Blob([buffer.buffer], { type: "image/jpeg" });
-}
-
-function uploadServer() {
-  const serverAddress = document.getElementById("serverAddress").value;
-  const formData = new FormData();
-  if (serverAddress != "") {
-    for (let i = 0; i < outputElement.children.length; i++) {
-      let base64 =
-        outputElement.children[i].shadowRoot.querySelector("img").src;
-      console.log(base64);
-      base64 = base64.slice(base64.indexOf("base64,") + 7);
-      console.log(base64);
-      formData.append("files", base64toJpg(base64), i + ".jpg");
-    }
-    fetch(serverAddress, {
-      method: "POST",
-      body: formData,
-      mode: "no-cors",
-    }).then(() => {
-    }).catch((err) => {
-      console.log(err);
-      alert(err);
-    });
-  } else {
-    const e = document.getElementById("serverAlert");
-    e.hidden = false;
-    e.scrollIntoView();
-  }
-}
-
-// https://github.com/dropbox/dropbox-sdk-js/blob/master/examples/javascript/utils.js
-function parseQueryString(str) {
-  const ret = Object.create(null);
-
-  if (typeof str !== "string") {
-    return ret;
-  }
-
-  str = str.trim().replace(/^(\?|#|&)/, "");
-
-  if (!str) {
-    return ret;
-  }
-
-  str.split("&").forEach((param) => {
-    const parts = param.replace(/\+/g, " ").split("=");
-    // Firefox (pre 40) decodes `%3D` to `=`
-    // https://github.com/sindresorhus/query-string/pull/37
-    let key = parts.shift();
-    let val = parts.length > 0 ? parts.join("=") : undefined;
-
-    key = decodeURIComponent(key);
-
-    // missing `=` should be `null`:
-    // http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
-    val = val === undefined ? null : decodeURIComponent(val);
-
-    if (ret[key] === undefined) {
-      ret[key] = val;
-    } else if (Array.isArray(ret[key])) {
-      ret[key].push(val);
-    } else {
-      ret[key] = [ret[key], val];
-    }
+function loadScript(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    script.src = url;
+    document.body.appendChild(script);
   });
-
-  return ret;
 }
-
-document.getElementById("reloadApp").addEventListener("click", (event) => {
-  e.preventDefault();
-  const baseUrl = event.currentTarget.dataset.href;
-  const clientId = document.getElementById("clientId").value;
-  location.href = baseUrl + "&client_id=" + clientId;
-});
 
 class ImageBox extends HTMLElement {
   constructor() {
@@ -180,244 +71,407 @@ class ImageBox extends HTMLElement {
     const template = document.getElementById("img-box")
       .content.cloneNode(true);
     template.querySelector("img").onclick = (event) => {
-      const img = document.getElementById("previewImage");
-      img.src = event.currentTarget.src;
-      img.width = event.target.naturalWidth;
-      img.height = event.target.naturalHeight;
-      previewModal.show();
+      filterPanel.setCanvas(event.target);
+      filterPanel.show();
+      editCarousel.carousel.to(1);
     };
-    template.querySelector(".close").onclick = (event) => {
-      event.currentTarget.parentNode.parentNode.parentNode.host.remove();
-    };
-    template.querySelector(".rotate").onclick = (event) => {
-      // https://stackoverflow.com/questions/16794310/rotate-image-with-javascript
-      const root = event.currentTarget.parentNode.parentNode;
-      const img = root.querySelector("img");
-      const angle = (parseInt(img.dataset.angle) + 90) % 360;
-      if (angle % 180 == 0) {
-        root.style.width = img.width + "px";
-        root.style.height = img.height + "px";
-      } else {
-        root.style.width = img.height + "px";
-        root.style.height = img.width + "px";
-      }
-      img.className = "rotate" + angle;
-      img.dataset.angle = angle;
-    };
+    template.querySelector(".close").onclick = () => this.remove();
     this.attachShadow({ mode: "open" }).appendChild(template);
   }
 }
 customElements.define("img-box", ImageBox);
 
-function initializeEvents() {
-  const closeButtons = document.getElementsByClassName("event-close");
-  for (let i = 0; i < closeButtons.length; i++) {
-    closeButtons[i].addEventListener("click", (event) => {
-      const target = event.currentTarget.getAttribute("data-bs-target");
-      document.querySelector(target).hidden = true;
+class Draggable {
+  x = 0;
+  y = 0;
+  tx = 0;
+  ty = 0;
+  cx = 0;
+  cy = 0;
+
+  constructor(target, checkConstraints) {
+    this.target = target;
+    this.checkConstraints = checkConstraints;
+    this.on();
+  }
+
+  on() {
+    const target = this.target;
+    target.draggable = false;
+    target.addEventListener("pointerdown", (event) => {
+      this.handleDownEvent(event);
+    });
+    target.addEventListener("pointermove", (event) => {
+      this.handleMoveEvent(event);
     });
   }
-  const openButtons = document.getElementsByClassName("event-open");
-  for (let i = 0; i < openButtons.length; i++) {
-    openButtons[i].addEventListener("click", (event) => {
-      const target = event.currentTarget.getAttribute("data-bs-target");
-      document.querySelector(target).hidden = false;
+
+  off() {
+    const target = this.target;
+    target.removeEventListener("pointerdown", (event) => {
+      handleDownEvent(event);
+    });
+    target.removeEventListener("pointermove", (event) => {
+      handleMoveEvent(event);
     });
   }
-  const langSelect = document.getElementById("lang");
-  langSelect.onchange = () => {
-    const lang = langSelect.options[langSelect.selectedIndex].value;
-    location.href = "/photo-scanner/" + lang;
-  };
-}
-initializeEvents();
 
-let animationFrame;
-let lastAnimated = 0;
-const snapCanvas = document.getElementById("snapCanvas");
-const uploadCanvas = document.getElementById("uploadCanvas");
-const video = document.createElement("video");
-const videoOptions = { video: { facingMode: "environment" } };
-const videoCanvas = document.getElementById("videoCanvas");
-const videoCanvasContext = videoCanvas.getContext("2d");
-const loadingMessage = document.getElementById("loadingMessage");
-const outputElement = document.getElementById("output");
+  handleDownEvent(event) {
+    const { clientX, clientY } = event;
+    const target = this.target;
+    const transform = target.style.transform;
+    const matrix = transform
+      ? transform.slice(7, -1).split(",").map(Number)
+      : [1, 0, 0, 1, 0, 0];
+    this.tx = matrix[4];
+    this.ty = matrix[5];
+    this.x = clientX;
+    this.y = clientY;
+    const rect = target.getBoundingClientRect();
+    this.cx = rect.left + rect.width / 2 - clientX;
+    this.cy = rect.top + rect.height / 2 - clientY;
+    target.setPointerCapture(event.pointerId);
+  }
 
-// const worker = new Worker('/photo-scanner/worker.js');
-// worker.addEventListener('message', (event) => {
-//   if (event.data.type == 'result') {
-//     const src = cv.matFromImageData(event.data.src);
-//     cv.imshow('snapCanvas', src);
-//     src.delete();
-//     const thumbnail = document.createElement('img-box');
-//     const img = thumbnail.shadowRoot.querySelector('img');
-//     img.src = snapCanvas.toDataURL('image/jpg');  // webp だとダウンロード時に困る
-//     img.height = 150 / snapCanvas.width * snapCanvas.height;
-//     outputElement.append(thumbnail);
-//   }
-// });
-
-if (navigator.mediaDevices.getUserMedia === undefined) {
-  navigator.mediaDevices.getUserMedia = (constraints) => {
-    const getUserMedia = navigator.webkitGetUserMedia ||
-      navigator.mozGetUserMedia;
-    if (!getUserMedia) {
-      return Promise.reject(
-        new Error("getUserMedia is not implemented in this browser"),
-      );
+  handleMoveEvent(event) {
+    if (!event.buttons) return;
+    const target = this.target;
+    if (this.checkConstraints) {
+      const { x, y } = this.checkConstraints(this, event);
+      const tx = x - this.x + this.tx;
+      const ty = y - this.y + this.ty;
+      const matrix = new DOMMatrix([1, 0, 0, 1, tx, ty]);
+      target.style.transform = matrix.toString();
+    } else {
+      const tx = event.clientX - this.x + this.tx;
+      const ty = event.clientY - this.y + this.ty;
+      const matrix = new DOMMatrix([1, 0, 0, 1, tx, ty]);
+      target.style.transform = matrix.toString();
     }
-    return new Promise((resolve, reject) => {
-      getUserMedia.call(navigator, constraints, resolve, reject);
-    });
-  };
+    target.dispatchEvent(new Event("dragend"));
+  }
 }
 
-cv.then((cv) => {
-  document.getElementById("snapshot").onclick = snapshot;
-  document.getElementById("clipboard").onclick = clipboardToThumbnail;
-  document.getElementById("selectImages").onclick = () => {
-    document.getElementById("inputImages").click();
+class Panel {
+  constructor(panel) {
+    this.panel = panel;
+  }
+
+  show() {
+    this.panel.classList.remove("d-none");
+  }
+
+  hide() {
+    this.panel.classList.add("d-none");
+  }
+
+  getActualRect(canvas) {
+    const canvasWidth = canvas.offsetWidth;
+    const canvasHeight = canvas.offsetHeight;
+    const naturalWidth = canvas.width;
+    const naturalHeight = canvas.height;
+    const aspectRatio = naturalWidth / naturalHeight;
+    let width, height, top, left, right, bottom;
+    if (canvasWidth / canvasHeight > aspectRatio) {
+      width = canvasHeight * aspectRatio;
+      height = canvasHeight;
+      top = 0;
+      left = (canvasWidth - width) / 2;
+      right = left + width;
+      bottom = canvasHeight;
+    } else {
+      width = canvasWidth;
+      height = canvasWidth / aspectRatio;
+      top = (canvasHeight - height) / 2;
+      left = 0;
+      right = canvasWidth;
+      bottom = top + height;
+    }
+    return { width, height, top, left, right, bottom };
+  }
+}
+
+class LoadPanel extends Panel {
+  constructor(panel) {
+    super(panel);
+
+    panel.querySelector(".clipboard").onclick = (event) => {
+      this.loadClipboardImage(event);
+    };
+    panel.querySelector(".selectImage").onclick = () => {
+      panel.querySelector(".inputImage").click();
+    };
+    panel.querySelector(".executeCamera").onclick = () => this.executeCamera();
+    panel.querySelector(".inputImage").onchange = (event) => {
+      this.loadInputImage(event);
+    };
+    document.body.onpaste = (event) => {
+      if (!this.panel.classList.contains("d-none")) {
+        this.loadClipboardImage(event);
+      }
+    };
+  }
+
+  executeCamera() {
+    cropPanel.hide();
+    loadPanel.hide();
+    cameraPanel.show();
+    cameraPanel.executeVideo();
+  }
+
+  handleImageOnloadEvent = (event) => {
+    const img = event.currentTarget;
+    const { naturalWidth, naturalHeight } = img;
+    cropPanel.canvas.width = naturalWidth;
+    cropPanel.canvas.height = naturalHeight;
+    cropPanel.canvasContext.drawImage(img, 0, 0);
+    filterPanel.canvas.width = naturalWidth;
+    filterPanel.canvas.height = naturalHeight;
+
+    cropPanel.setCropPivotsPosition();
+    const src = cv.imread(cropPanel.canvas);
+    const rect = cameraPanel.findRect(src, cropPanel.canvas);
+    src.delete();
+    cropPanel.drawSvgRect(rect);
   };
 
-  function syncVideo(video, options) {
-    uploadCanvas.hidden = true;
-    if (video.srcObject) {
-      video.srcObject.getVideoTracks().forEach((camera) => {
-        camera.stop();
+  loadImage(url) {
+    loadPanel.hide();
+    editCarousel.show();
+    cropPanel.show();
+    const img = new Image();
+    img.onload = (event) => this.handleImageOnloadEvent(event);
+    img.src = url;
+  }
+
+  loadInputImage(event) {
+    const file = event.currentTarget.files[0];
+    if (file.type === "image/svg+xml") {
+      alert("SVG is not supported.");
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    this.loadImage(url);
+    event.currentTarget.value = "";
+  }
+
+  async loadClipboardImage() {
+    try {
+      const items = await navigator.clipboard.read();
+      const item = items[0];
+      for (const type of item.types) {
+        if (type === "image/svg+xml") {
+          alert("SVG is not supported.");
+        } else if (type.startsWith("image/")) {
+          const file = await item.getType(type);
+          const url = URL.createObjectURL(file);
+          this.loadImage(url);
+          break;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+class CameraPanel extends Panel {
+  stream;
+  animationFrame;
+  lastAnimated = 0;
+
+  constructor(panel) {
+    super(panel);
+    const video = document.createElement("video");
+    video.addEventListener("resize", async () => {
+      const { videoWidth, videoHeight } = video;
+      if (!videoWidth) return;
+      if (!videoHeight) return;
+      if (!this.stream) return;
+      const track = this.stream.getVideoTracks()[0];
+      const settings = this.getSettings(track);
+      if (videoWidth === settings.width) return;
+      await track.applyConstraints(this.videoOptions.video);
+    });
+    video.addEventListener("play", () => {
+      this.loadingMessage.classList.add("d-none");
+    });
+    this.video = video;
+    this.videoOptions = {
+      audio: false,
+      video: { facingMode: "environment" },
+    };
+    this.canvas = panel.querySelector("canvas");
+    this.canvasContext = this.canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
+    this.canvasContainer = this.canvas.parentNode;
+    this.loadingMessage = panel.querySelector(".loadingMessage");
+    panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
+    panel.querySelector(".toggleFacingMode").onclick = () =>
+      this.toggleFacingMode();
+    panel.querySelector(".snapshot").onclick = () => this.snapshot();
+  }
+
+  moveLoadPanel() {
+    this.stopCamera();
+    this.hide();
+    loadPanel.show();
+  }
+
+  toggleFacingMode() {
+    const video = this.videoOptions.video;
+    if (video.facingMode == "user") {
+      video.facingMode = "environment";
+    } else {
+      video.facingMode = "user";
+    }
+    this.executeVideo();
+  }
+
+  stopCamera() {
+    const srcObject = this.video.srcObject;
+    if (srcObject) {
+      srcObject.getVideoTracks().forEach((track) => {
+        track.stop();
       });
     }
-    navigator.mediaDevices.getUserMedia(options).then((stream) => {
-      videoCanvas.hidden = false;
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-      video.play();
-      loadingMessage.textContent = "⌛ Loading video...";
-      animationFrame = requestAnimationFrame(tickVideo);
-    }).catch((_err) => {
-      // alert(err.message);
-    });
+    this.stream = null;
   }
-  syncVideo(video, videoOptions);
 
-  document.getElementById("facingMode").onclick = () => {
-    if (videoOptions.video.facingMode == "user") {
-      videoOptions.video.facingMode = "environment";
+  updateVideoOptions(settings) {
+    const { width, height, aspectRatio } = settings;
+    const videoOptions = this.videoOptions.video;
+    videoOptions.width = { ideal: width };
+    videoOptions.height = { ideal: height };
+    // videoOptions.aspectRatio = { exact: aspectRatio };
+  }
+
+  setCanvasSize(settings) {
+    cameraPanel.canvas.width = settings.width;
+    cameraPanel.canvas.height = settings.height;
+  }
+
+  getSettings(track) {
+    const settings = track.getSettings();
+    const { width, height } = settings;
+    // The initial value of settings.aspectRatio is undefined on iOS
+    if (!settings.aspectRatio) settings.aspectRatio = width / height;
+    if (globalThis.innerHeight > globalThis.innerWidth) {
+      if (settings.height < settings.width) {
+        settings.width = height;
+        settings.height = width;
+        settings.aspectRatio = 1 / settings.aspectRatio;
+      }
     } else {
-      videoOptions.video.facingMode = "user";
-    }
-    syncVideo(video, videoOptions);
-  };
-
-  document.getElementById("inputImages").onchange = (event) => {
-    loadingMessage.hidden = false;
-    loadingMessage.textContent = "⌛ Loading image...";
-    cancelAnimationFrame(animationFrame);
-    uploadCanvas.hidden = false;
-    videoCanvas.hidden = true;
-    const files = event.currentTarget.files;
-    for (let i = 0; i < files.length; i++) {
-      if (files[i].type.startsWith("image/")) {
-        if (files[i].type.startsWith("image/svg")) {
-          alert("Sorry, SVG is probably not convertible.");
-        }
-        const url = URL.createObjectURL(files[i]);
-        loadImage(uploadCanvas, url);
+      if (settings.height > settings.width) {
+        settings.width = height;
+        settings.height = width;
+        settings.aspectRatio = 1 / settings.aspectRatio;
       }
     }
-  };
-
-  function drawRect(videoCanvas) {
-    const src = cv.imread(videoCanvas);
-    const dst = new cv.Mat();
-    cv.resize(
-      src,
-      dst,
-      new cv.Size(videoCanvas.width / 2, videoCanvas.height / 2),
-      0,
-      0,
-      cv.INTER_NEAREST,
-    ); // リサイズしないと重い
-    const approx = findApprox(dst);
-    if (approx.total() == 4) {
-      cv.imshow("videoCanvas", dst);
-      document.getElementById("snapshot").style.fill = "blue";
-    } else {
-      document.getElementById("snapshot").style.fill = "black";
-    }
-    approx.delete();
-    src.delete();
-    dst.delete();
+    return settings;
   }
 
-  function tickVideo() {
+  async initVideo() {
+    // video.videoWidth and getSettings().width are often different.
+    // So we need to check their values in video.addEventListener("resize")
+    // and make them same if they are different.
+    if (!this.stream) {
+      this.stream = await navigator.mediaDevices.getUserMedia(
+        this.videoOptions,
+      );
+    }
+    const track = this.stream.getVideoTracks()[0];
+    await track.applyConstraints(this.videoOptions.video);
+    const settings = this.getSettings(track);
+    this.updateVideoOptions(settings);
+    this.setCanvasSize(settings);
+  }
+
+  async executeVideo() {
+    this.stopCamera();
+    this.loadingMessage.classList.remove("d-none");
+    await this.initVideo();
+    const video = this.video;
+    video.srcObject = this.stream;
+    // https://qiita.com/tinymouse/items/8b82f3578e167627d209
+    // https://stackoverflow.com/questions/53483975/
+    video.autoPlay = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.play();
+    this.animationFrame = requestAnimationFrame(this.tickVideo);
+  }
+
+  // drawCanvasRect() {
+  //   const src = cv.imread(this.canvas);
+  //   const rect = this.findRect(src, this.canvas);
+  //   // const color = new cv.Scalar(255, 255, 255, 255); // RGBA
+  //   const color = new cv.Scalar(
+  //     Math.round(Math.random() * 255),
+  //     Math.round(Math.random() * 255),
+  //     Math.round(Math.random() * 255),
+  //     255,
+  //   );
+  //   for (let i = 0; i < 4; i++) {
+  //     cv.line(src, rect[i], rect[(i + 1) % 4], color, 1, cv.LINE_AA);
+  //   }
+  //   cv.imshow(this.canvas, src);
+  //   src.delete();
+  // }
+
+  tickVideo = () => {
     const fps = 30;
     const t = Date.now();
-    if (lastAnimated + 1000 / fps < t) {
-      lastAnimated = t;
+    if (this.lastAnimated + 1000 / fps < t) {
+      this.lastAnimated = t;
+      const video = this.video;
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        loadingMessage.hidden = true;
-        videoCanvas.width = video.videoWidth;
-        videoCanvas.height = video.videoHeight;
-        videoCanvasContext.drawImage(
-          video,
-          0,
-          0,
-          videoCanvas.width,
-          videoCanvas.height,
-        );
-        drawRect(videoCanvas);
+        this.canvasContext.drawImage(video, 0, 0);
+        // this.drawCanvasRect();
       }
     }
-    animationFrame = requestAnimationFrame(tickVideo);
+    this.animationFrame = requestAnimationFrame(this.tickVideo);
+  };
+
+  snapshot() {
+    if (this.video.srcObject) {
+      new Audio("/photo-scanner/camera.mp3").play();
+      this.hide();
+      editCarousel.show();
+      cropPanel.canvas.width = this.video.videoWidth;
+      cropPanel.canvas.height = this.video.videoHeight;
+      cropPanel.show();
+      cropPanel.canvasContext.drawImage(this.canvas, 0, 0);
+      cropPanel.setCropPivotsPosition();
+      const src = cv.imread(cropPanel.canvas);
+      const rect = this.findRect(src, cropPanel.canvas);
+      src.delete();
+      cropPanel.drawSvgRect(rect);
+      this.stopCamera();
+    }
   }
 
-  // findContours で抽出される矩形領域の順序を正しい順序に変換 (バグあり)
-  function _sortPoints(p) {
-    const ps = [p[0] + p[1], p[2] + p[3], p[4] + p[5], p[6] + p[7]];
-    let min = ps[0];
-    let max = ps[0];
-    let minPos = 0;
-    let maxPos = 0;
-    for (let i = 1; i < 4; i++) {
-      if (max < ps[i]) {
-        max = ps[i];
-        maxPos = i;
-      }
-      if (min > ps[i]) {
-        min = ps[i];
-        minPos = i;
-      }
-    }
-    const minmax = [minPos, maxPos];
-    const idx = [0, 1, 2, 3].filter((e) => {
-      return !minmax.includes(e);
+  fixRect(rect, canvas) {
+    const actualRect = this.getActualRect(canvas);
+    const w = actualRect.width;
+    const h = actualRect.height;
+    rect.forEach((vertice) => {
+      if (vertice.x < 0) vertice.x = 0;
+      if (w < vertice.x) vertice.x = w;
+      if (vertice.y < 0) vertice.y = 0;
+      if (h < vertice.y) vertice.y = h;
     });
-    let second;
-    let fourth;
-    if (p[idx[0] * 2] < p[idx[1] * 2]) {
-      second = idx[0];
-      fourth = idx[1];
-    } else {
-      second = idx[1];
-      fourth = idx[0];
-    }
-    return [
-      p[minPos * 2],
-      p[minPos * 2 + 1],
-      p[second * 2],
-      p[second * 2 + 1],
-      p[maxPos * 2],
-      p[maxPos * 2 + 1],
-      p[fourth * 2],
-      p[fourth * 2 + 1],
-    ];
+    return rect;
   }
 
-  function findApprox(src) {
-    const dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-    // 2値化
-    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY, 0);
-    const blockSize = (dst.rows + dst.cols) / 8 * 2 + 1; // 縦横幅の 1/4
+  findRect(src, canvas) {
+    const dst = new cv.Mat();
+    cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+    // blockSize = 5% width
+    // Small areas are not important, however 10% is too strong.
+    const blockSize = Math.round(dst.rows / 40) * 2 + 1;
     cv.adaptiveThreshold(
       dst,
       dst,
@@ -425,389 +479,760 @@ cv.then((cv) => {
       cv.ADAPTIVE_THRESH_GAUSSIAN_C,
       cv.THRESH_BINARY,
       blockSize,
-      0,
+      5,
     );
-    // 輪郭抽出して最大面積の領域を処理対象に
+    // Large areas cannot be acquired without weak denoising.
+    // However, strong denoising causes the area to become excessively large.
+    cv.medianBlur(dst, dst, 9);
+
     const contours = new cv.MatVector();
     const hierarchy = new cv.Mat();
     cv.findContours(
       dst,
       contours,
       hierarchy,
-      cv.RETR_EXTERNAL,
-      cv.CHAIN_APPROX_SIMPLE,
+      cv.RETR_LIST,
+      cv.CHAIN_APPROX_TC89_L1,
     );
     dst.delete();
-    let maxPos = 0;
-    let maxSize = 0;
+
+    let firstPos = 0;
+    let secondPos = 0;
+    let firstSize = 0;
+    let secondSize;
     for (let i = 0; i < contours.size(); i++) {
       const cnt = contours.get(i);
       const size = cv.contourArea(cnt, false);
-      if (maxSize < size) {
-        maxSize = size;
-        maxPos = i;
+      if (firstSize < size) {
+        secondSize = size;
+        secondPos = firstPos;
+        firstSize = size;
+        firstPos = i;
+      } else if (secondSize < size && size < firstSize) {
+        secondSize = size;
+        secondPos = i;
       }
       cnt.delete();
     }
-    // 直線近似
-    const cnt = contours.get(maxPos);
+    const cnt = contours.get(secondPos);
+    const rect = cv.minAreaRect(cnt);
+    const vertices = cv.RotatedRect.points(rect);
+
     contours.delete();
-    const poly = new cv.MatVector();
-    const approx = new cv.Mat();
-    cv.approxPolyDP(cnt, approx, 0.05 * cv.arcLength(cnt, true), true); // 全長 5% 精度
-    // cv.approxPolyDP(cnt, approx, 10, true);
-    poly.push_back(approx);
-    if (approx.total() == 4) {
-      const color = new cv.Scalar(255, 255, 255, 0); // TODO: なぜか 0 になる
-      cv.drawContours(src, poly, 0, color, 4, cv.LINE_8, hierarchy, 0);
-    }
     hierarchy.delete();
     cnt.delete();
-    poly.delete();
-    return approx;
+    return this.fixRect(vertices, canvas);
   }
+}
 
-  function affineImage(src, filterStatus) {
-    const approx = findApprox(src);
+class CropPanel extends LoadPanel {
+  initialPoints;
+  updatedPoints;
+  actualRect;
 
-    // 四角形なら台形変換
-    if (approx.total() == 4) {
-      const r = approx.data32S.slice(0, 8);
-      // const srcM = cv.matFromArray(4, 1, cv.CV_32FC2, sortPoints(r));  // バグあり
-      const srcM = cv.matFromArray(4, 1, cv.CV_32FC2, r);
-      const [w, h] = calcContourCanvasSize(r, src.rows, src.cols);
-      const dsize = new cv.Size(w, h);
-      const dstM = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, 0, h, w, h, w, 0]);
-      const M = cv.getPerspectiveTransform(srcM, dstM);
-      cv.warpPerspective(
-        src,
-        src,
-        M,
-        dsize,
-        cv.INTER_LINEAR,
-        cv.BORDER_CONSTANT,
-        new cv.Scalar(),
-      );
-      M.delete();
-      if (filterStatus == "1") {
-        denoiseImage(src);
-      } else if (filterStatus == "2") {
-        deepDenoiseImage(src);
-      }
-    }
-    cv.imshow("snapCanvas", src);
-    approx.delete();
-  }
+  constructor(panel) {
+    super(panel);
 
-  function calcContourCanvasSize(r, w, h) {
-    const ratio = getConfigRatio();
-    if (ratio == 0) {
-      // 縦横比を算出するのは大変なので頑張らない
-      // 一般論として仮定がもう1つないと縦横比は算出できない
-      const l12 = Math.sqrt((r[0] - r[2]) ** 2 + (r[1] - r[3]) ** 2);
-      const l23 = Math.sqrt((r[2] - r[4]) ** 2 + (r[3] - r[5]) ** 2);
-      const l34 = Math.sqrt((r[4] - r[6]) ** 2 + (r[5] - r[7]) ** 2);
-      const l41 = Math.sqrt((r[6] - r[0]) ** 2 + (r[7] - r[2]) ** 2);
-      const wNew = l23 + l41;
-      const hNew = l12 + l34;
-      h = Math.round(w / wNew * hNew);
-    } else {
-      if (w > h) {
-        h = w / ratio;
-      } else {
-        w = h * ratio;
-      }
-    }
-    return [w, h];
-  }
-
-  function denoiseImage(src) {
-    // https://stackoverflow.com/questions/44752240/
-    const rgbaPlanes = new cv.MatVector();
-    const resultPlanes = new cv.MatVector();
-    cv.split(src, rgbaPlanes);
-    for (let i = 0; i < 3; i++) {
-      const mat = rgbaPlanes.get(i);
-      const dst = new cv.Mat();
-      const M = cv.Mat.ones(7, 7, cv.CV_8U);
-      const anchor = new cv.Point(-1, -1);
-      cv.dilate(
-        mat,
-        dst,
-        M,
-        anchor,
-        1,
-        cv.BORDER_CONSTANT,
-        cv.morphologyDefaultBorderValue(),
-      );
-      cv.medianBlur(dst, dst, 21);
-      const color = new cv.Scalar(255, 255, 255, 0);
-      const black = new cv.Mat(mat.rows, mat.cols, cv.CV_8UC1, color);
-      cv.absdiff(mat, dst, dst);
-      cv.subtract(black, dst, mat);
-      cv.normalize(mat, mat, alpha = 0, beta = 255, norm_type = cv.NORM_MINMAX);
-      resultPlanes.push_back(mat);
-      mat.delete();
-      M.delete();
-      dst.delete();
-      black.delete();
-    }
-    cv.merge(resultPlanes, src);
-    rgbaPlanes.delete();
-    resultPlanes.delete();
-    return src;
-  }
-
-  // let model;  // wasm だと resizeNearestNeighbour が使えない
-  // tf.setBackend('wasm').then(() => {
-  //   tf.loadLayersModel('/photo-scanner/denoise/model.json')
-  //     .then(pretrainedModel => {
-  //       model = pretrainedModel;
-  //     });
-  // });
-  let model;
-  tf.loadLayersModel("/photo-scanner/denoise/model.json")
-    .then((pretrainedModel) => {
-      model = pretrainedModel;
+    this.panel = panel;
+    this.canvas = panel.querySelector("canvas");
+    this.canvasContext = this.canvas.getContext("2d", {
+      willReadFrequently: true,
     });
-  function deepDenoiseImage(src) {
-    try {
-      const dst = new cv.Mat();
-      cv.resize(src, dst, new cv.Size(256, 256), 0, 0, cv.INTER_NEAREST); // リサイズしないと WebGL の上限に抵触
-      const score = tf.tidy(() => {
-        const channels = 3;
-        // let input = tf.browser.fromPixels(src, channels).expandDims(0)
-        cv.cvtColor(dst, dst, cv.COLOR_RGBA2RGB, 0);
-        let input = tf.tensor3d(new Uint8Array(dst.data), [
-          dst.rows,
-          dst.cols,
-          channels,
-        ])
-          .expandDims(0).toFloat();
-        input = tf.cast(input, "float32").div(tf.scalar(255));
-        const denoised = model.predict(input).mul(tf.scalar(255)).dataSync();
-        const arr = new Uint8ClampedArray(dst.rows * dst.cols * 4);
-        for (let i = 0; i < denoised.length; i += 3) {
-          const j = i * 3 / 4;
-          arr[j] = denoised[i]; // R value
-          arr[j + 1] = denoised[i + 1]; // G value
-          arr[j + 2] = denoised[i + 2]; // B value
-          arr[j + 3] = 0; // A value
-        }
-        const res = new ImageData(arr, 256, 256);
-        const m = cv.matFromImageData(res);
-        cv.resize(
-          m,
-          m,
-          new cv.Size(src.rows, src.cols),
-          0,
-          0,
-          cv.INTER_NEAREST,
-        );
-        cv.absdiff(src, src, m);
-        dst.delete();
-        return denoised;
-      });
-      return score;
-    } catch (err) {
-      alert(err);
-      console.log(err);
-    }
-  }
+    this.canvasContainer = this.canvas.parentNode;
+    this.cropPivots = panel.querySelector(".cropPivots");
+    this.circles = [...this.cropPivots.getElementsByTagName("circle")];
+    this.polygon = this.cropPivots.querySelector("polygon");
 
-  function calcSnapSize() {
-    const config = document.getElementById("config");
-    const area = parseInt(config.resolution.value) * 1000;
-    const r = videoCanvas.width / videoCanvas.height;
-    const w = Math.sqrt(area / r);
-    return [w * r, w];
-  }
-
-  function getConfigFilterStatus() {
-    const config = document.getElementById("config");
-    return config.filter.value;
-  }
-
-  function getConfigRatio() {
-    const config = document.getElementById("config");
-    let v = parseFloat(config.ratio.value);
-    if (v == -1) {
-      v = document.getElementById("ratioValue").value;
-    }
-    return v;
-  }
-
-  function snapshot() {
-    if (video.srcObject) {
-      new Audio("camera.mp3").play();
-      const [w, h] = calcSnapSize();
-      const options = {
-        video: {
-          facingMode: "environment",
-          width: { min: 0, max: w },
-          height: { min: 0, max: h },
-          aspectRatio: w / h,
-        },
-      };
-      syncCapture(video, options);
-    }
-  }
-
-  function syncCapture(video, options) {
-    uploadCanvas.hidden = true;
-    if (video.srcObject) {
-      video.srcObject.getVideoTracks().forEach((camera) => {
-        camera.stop();
-      });
-    }
-    navigator.mediaDevices.getUserMedia(options).then((stream) => {
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
-      video.play();
-      animationFrame = requestAnimationFrame(tickCapture);
-    }).catch((_err) => {
-      // alert(err.message);
-    });
-  }
-
-  function tickCapture() {
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      videoCanvas.width = video.videoWidth;
-      videoCanvas.height = video.videoHeight;
-      videoCanvasContext.drawImage(
-        video,
-        0,
-        0,
-        videoCanvas.width,
-        videoCanvas.height,
-      );
-      snapToThumbnail(videoCanvas);
-      syncVideo(video, videoOptions);
-      return;
-    }
-    animationFrame = requestAnimationFrame(tickCapture);
-  }
-
-  function loadImage(uploadCanvas, url) {
-    const img = new Image();
-    img.onload = () => {
-      loadingMessage.hidden = true;
-      uploadCanvas.width = img.naturalWidth;
-      uploadCanvas.height = img.naturalHeight;
-      uploadCanvas.getContext("2d").drawImage(
-        img,
-        0,
-        0,
-        uploadCanvas.width,
-        uploadCanvas.height,
-      );
-      snapToThumbnail(uploadCanvas);
+    this.addTransformPolygonEvents();
+    this.addDraggablePivotsEvents();
+    panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
+    panel.querySelector(".perspectiveProjection").onclick = () => {
+      const canvas = this.perspectiveProjection();
+      filterPanel.setCanvas(canvas);
+      filterPanel.show();
+      editCarousel.carousel.to(1);
     };
-    img.src = url;
   }
 
-  function clipboardToThumbnail() {
-    try {
-      loadingMessage.textContent = "⌛ Loading image...";
-      loadingMessage.hidden = false;
-      navigator.clipboard.read().then((images) => {
-        for (let i = 0; i < images.length; i++) {
-          const img = images[i];
-          for (let j = 0; j < img.types.length; j++) {
-            const type = img.types[j];
-            if (type.indexOf("image/") != -1) {
-              if (type.startsWith("image/svg")) {
-                alert("Sorry, SVG is probably not convertible.");
-              }
-              img.getType(type).then((blob) => {
-                cancelAnimationFrame(animationFrame);
-                uploadCanvas.hidden = false;
-                videoCanvas.hidden = true;
-                const url = URL.createObjectURL(blob);
-                loadImage(uploadCanvas, url);
-              });
-            }
-          }
-        }
+  moveLoadPanel() {
+    this.hide();
+    editCarousel.hide();
+    loadPanel.show();
+  }
+
+  setCropPivotsPosition() {
+    const actualRect = this.getActualRect(this.canvas);
+    this.actualRect = actualRect;
+    const cropPivots = this.cropPivots;
+    cropPivots.setAttribute("width", actualRect.width);
+    cropPivots.setAttribute("height", actualRect.height);
+    cropPivots.style.top = `${actualRect.top}px`;
+    cropPivots.style.left = `${actualRect.left}px`;
+  }
+
+  resizeCropPivots() {
+    const cropPivots = this.cropPivots;
+    const actualRect = this.getActualRect(this.canvas);
+    if (actualRect.width === 0) return;
+    cropPivots.style.top = actualRect.top;
+    cropPivots.style.left = actualRect.left;
+    const prevWidth = Number(cropPivots.getAttribute("width"));
+    const scale = actualRect.width / prevWidth;
+    if (scale === 1) return;
+    cropPivots.setAttribute("width", actualRect.width);
+    cropPivots.setAttribute("height", actualRect.height);
+    this.initialPoints = this.initialPoints.map((p) => p * scale);
+    this.updatedPoints = this.updatedPoints.map((p) => p * scale);
+    this.polygon.setAttribute("points", this.updatedPoints.join(" "));
+    this.circles.forEach((circle, i) => {
+      const cx = this.initialPoints[i * 2];
+      const cy = this.initialPoints[i * 2 + 1];
+      circle.setAttribute("cx", cx);
+      circle.setAttribute("cy", cy);
+      const tx = this.updatedPoints[i * 2] - cx;
+      const ty = this.updatedPoints[i * 2 + 1] - cy;
+      const matrix = [1, 0, 0, 1, tx, ty];
+      circle.style.transform = new DOMMatrix(matrix).toString();
+    });
+  }
+
+  addTransformPolygonEvents() {
+    for (let i = 0; i < this.circles.length; i++) {
+      this.circles[i].addEventListener("dragend", () => {
+        const pos1 = 2 * i;
+        const pos2 = pos1 + 1;
+        const transform = this.circles[i].style.transform;
+        const matrix = transform
+          ? transform.slice(7, -1).split(",").map(Number)
+          : [1, 0, 0, 1, 0, 0];
+        const [tx, ty] = matrix.slice(4);
+        this.updatedPoints[pos1] = this.initialPoints[pos1] + tx;
+        this.updatedPoints[pos2] = this.initialPoints[pos2] + ty;
+        this.polygon.setAttribute("points", this.updatedPoints.join(" "));
       });
-    } finally {
-      loadingMessage.hidden = true;
     }
   }
 
-  document.body.onpaste = (event) => {
-    loadingMessage.textContent = "⌛ Loading image...";
-    loadingMessage.hidden = false;
-    const items =
-      (event.clipboardData || event.originalEvent.clipboardData).items;
-    let blob;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") === 0) {
-        blob = items[i].getAsFile();
-      }
+  addDraggablePivotsEvents() {
+    for (let i = 0; i < this.circles.length; i++) {
+      new Draggable(this.circles[i], this.checkConstraints);
     }
-    if (blob !== null) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        cancelAnimationFrame(animationFrame);
-        uploadCanvas.hidden = false;
-        videoCanvas.hidden = true;
-        const url = event.currentTarget.result;
-        loadImage(uploadCanvas, url);
-      };
-      reader.readAsDataURL(blob);
+  }
+
+  perspectiveProjection() {
+    const canvas = document.createElement("canvas");
+    const src = cv.imread(this.canvas);
+
+    const scale = this.canvas.offsetWidth / this.canvas.width;
+    const points = this.updatedPoints.map((p) => p / scale);
+    const cvPoints = [
+      ...points.slice(0, 4),
+      ...points.slice(6, 8),
+      ...points.slice(4, 6),
+    ];
+    const newPoints = [0, 0, src.cols, 0, 0, src.rows, src.cols, src.rows];
+
+    const dst = new cv.Mat();
+    const dsize = new cv.Size(src.cols, src.rows);
+    const srcM = cv.matFromArray(4, 1, cv.CV_32FC2, cvPoints);
+    const dstM = cv.matFromArray(4, 1, cv.CV_32FC2, newPoints);
+    const M = cv.getPerspectiveTransform(srcM, dstM);
+    cv.warpPerspective(
+      src,
+      dst,
+      M,
+      dsize,
+      cv.INTER_LINEAR,
+      cv.BORDER_CONSTANT,
+      new cv.Scalar(),
+    );
+    cv.imshow(canvas, dst);
+    srcM.delete();
+    dstM.delete();
+    M.delete();
+    src.delete();
+    dst.delete();
+    return canvas;
+  }
+
+  // perspectiveProjection() {
+  //   const w = this.canvas.width;
+  //   const h = this.canvas.height;
+  //   const scale = this.canvas.offsetWidth / w;
+  //   const points = this.updatedPoints.map((p) => p / scale);
+  //   const newPoints = [0, 0, w, 0, w, h, 0, h]
+  //   const canvas = glfx.canvas();
+  //   const texture = canvas.texture(this.canvas);
+  //   canvas.draw(texture).perspective(points, newPoints).update();
+  //   return canvas;
+  // }
+
+  drawSvgRect(rect) {
+    const scale = this.canvas.offsetWidth / this.canvas.width;
+    rect.map((vertice) => {
+      vertice.x *= scale;
+      vertice.y *= scale;
+    });
+    for (let i = 0; i < this.circles.length; i++) {
+      const circle = this.circles[i];
+      circle.setAttribute("cx", rect[i].x);
+      circle.setAttribute("cy", rect[i].y);
+      circle.style.removeProperty("transform");
     }
-    loadingMessage.hidden = true;
+    const points = rect.map((vertice) => `${vertice.x},${vertice.y}`).join(" ");
+    this.polygon.setAttribute("points", points);
+    this.polygon.style.removeProperty("transform");
+    this.initialPoints = this.polygon.getAttribute("points")
+      .split(/[, ]/).map(Number);
+    this.updatedPoints = structuredClone(this.initialPoints);
+  }
+
+  getIndexValue(points, i) {
+    if (points.length <= i) {
+      return points[i - points.length];
+    } else {
+      return points.at(i);
+    }
+  }
+
+  checkConstraints = (draggable, event) => {
+    const { clientX, clientY } = event;
+    return this.checkMinMax(draggable, clientX, clientY);
   };
 
-  function snapToThumbnail(element) {
-    const src = cv.imread(element);
-    affineImage(src, getConfigFilterStatus());
-    cv.imshow("snapCanvas", src);
-    src.delete();
+  checkMinMax(draggable, x, y) {
+    const rect = this.cropPivots.getBoundingClientRect();
+    let { left, top, right, bottom } = rect;
+    left -= draggable.cx;
+    right -= draggable.cx;
+    top -= draggable.cy;
+    bottom -= draggable.cy;
+    const newX = Math.max(left, Math.min(x, right));
+    const newY = Math.max(top, Math.min(y, bottom));
+    const isTrusted = newX === x && newY === y;
+    return { x: newX, y: newY, isTrusted };
+  }
+}
+
+class ThumbnailPanel extends Panel {
+  constructor(panel) {
+    super(panel);
+    this.gallery = panel.querySelector(".gallery");
+    panel.querySelector(".remove").onclick = () => this.remove();
+    panel.querySelector(".download").onclick = () => this.download();
+    panel.querySelector(".uploadDropbox").onclick = () => {
+      configPanel.uploadDropbox();
+    };
+    panel.querySelector(".uploadServer").onclick = () => {
+      configPanel.uploadServer();
+    };
+    panel.querySelector(".showConfig").onclick = () => {
+      configPanel.collapse.show();
+    };
+  }
+
+  add(canvas) {
     const thumbnail = document.createElement("img-box");
     const img = thumbnail.shadowRoot.querySelector("img");
-    img.src = snapCanvas.toDataURL("image/jpg"); // webp だとダウンロード時に困る
-    img.height = 150 / snapCanvas.width * snapCanvas.height;
-    outputElement.append(thumbnail);
-
-    // let src = element.getContext('2d').getImageData(0, 0, element.width, element.height);
-    // let denoise = getConfigFilterStatus();
-    // worker.postMessage({type:'affineImage', src:src, denoise:denoise });
+    img.src = canvas.toDataURL("image/jpeg");
+    img.width = 150;
+    img.height = 150 / canvas.width * canvas.height;
+    this.gallery.append(thumbnail);
   }
-}).catch((err) => {
-  alert(err);
-});
 
-loadConfig();
-const tooltipTriggerList = [].slice.call(
-  document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+  remove() {
+    while (this.gallery.firstChild) {
+      this.gallery.removeChild(this.gallery.lastChild);
+    }
+  }
+
+  download() {
+    const gallery = this.gallery;
+    for (let i = 0; i < gallery.children.length; i++) {
+      const a = document.createElement("a");
+      a.download = i + ".jpg";
+      a.href = gallery.children[i].shadowRoot.querySelector("img").src;
+      gallery.appendChild(a);
+      a.click();
+      gallery.removeChild(a);
+    }
+  }
+}
+
+class FilterPanel extends Panel {
+  constructor(panel) {
+    super(panel);
+    this.selectedIndex = 0;
+    this.glfxCanvas = glfx.canvas();
+    this.canvas = panel.querySelector("canvas");
+    this.offscreenCanvas = document.createElement("canvas");
+    this.offscreenCanvasContext = this.offscreenCanvas.getContext("2d", {
+      willReadFrequently: true,
+    });
+    this.canvasContainer = this.canvas.parentNode;
+
+    panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
+    panel.querySelector(".filterSelect").onchange = (event) =>
+      this.filterSelect(event);
+    panel.querySelector(".backToCrop").onclick = () => this.backToCrop();
+    panel.querySelector(".rotate").onclick = () => this.rotate();
+    panel.querySelector(".saveToAlbum").onclick = () => this.saveToAlbum();
+    this.addGlfxEvents(panel);
+    this.addAspectRatioEvents(panel);
+  }
+
+  show() {
+    super.show();
+  }
+
+  moveLoadPanel() {
+    this.hide();
+    editCarousel.hide();
+    editCarousel.carousel.to(0);
+    loadPanel.show();
+  }
+
+  filterSelect(event) {
+    this.texture.loadContentsOf(this.glfxCanvas.update());
+    const options = event.target.options;
+    const selectedIndex = options.selectedIndex;
+    const prevClass = options[this.selectedIndex].value;
+    const currClass = options[selectedIndex].value;
+    this.panel.querySelector(`.${prevClass}`).classList.add("d-none");
+    this.panel.querySelector(`.${currClass}`).classList.remove("d-none");
+    this.selectedIndex = selectedIndex;
+  }
+
+  addAspectRatioEvents(panel) {
+    const radioInputs = panel.querySelectorAll("input[type=radio]");
+    const manualRadioInput = radioInputs[radioInputs.length - 1];
+    radioInputs.forEach((input) => {
+      input.onclick = () => {
+        if (input.checked == "true") return;
+        input.checked = true;
+        this.setAspectRatio(Number(input.value));
+      };
+    });
+    panel.querySelector(".aspectRatioValue").onchange = (event) => {
+      manualRadioInput.checked = true;
+      const value = Number(event.currentTarget.value);
+      if (value) this.setAspectRatio(value);
+    };
+  }
+
+  addGlfxEvents(panel) {
+    this.filtering = false;
+    this.binarizationBlocksizeRange = panel.querySelector(
+      ".binarizationBlocksizeRange",
+    );
+    this.binarizationCRange = panel.querySelector(".binarizationCRange");
+    this.brightnessRange = panel.querySelector(".brightnessRange");
+    this.contrastRange = panel.querySelector(".contrastRange");
+    this.hueRange = panel.querySelector(".hueRange");
+    this.saturationRange = panel.querySelector(".saturationRange");
+    this.vibranceRange = panel.querySelector(".vibranceRange");
+    this.denoiseRange = panel.querySelector(".denoiseRange");
+    this.unsharpMaskRadiusRange = panel.querySelector(
+      ".unsharpMaskRadiusRange",
+    );
+    this.unsharpMaskStrengthRange = panel.querySelector(
+      ".unsharpMaskStrengthRange",
+    );
+    this.sepiaRange = panel.querySelector(".sepiaRange");
+
+    this.binarizationBlocksizeRange.oninput = () => this.binarization();
+    this.binarizationBlocksizeRange.onchange = () => this.binarization();
+    this.binarizationCRange.oninput = () => this.binarization();
+    this.binarizationCRange.onchange = () => this.binarization();
+    this.brightnessRange.oninput = () => this.brightnessContrast();
+    this.brightnessRange.onchange = () => this.brightnessContrast();
+    this.contrastRange.oninput = () => this.brightnessContrast();
+    this.contrastRange.onchange = () => this.brightnessContrast();
+    this.hueRange.oninput = () => this.hueSaturation();
+    this.hueRange.onchange = () => this.hueSaturation();
+    this.saturationRange.oninput = () => this.hueSaturation();
+    this.saturationRange.onchange = () => this.hueSaturation();
+    this.vibranceRange.oninput = () => this.vibrance();
+    this.vibranceRange.onchange = () => this.vibrance();
+    this.denoiseRange.oninput = () => this.denoise();
+    this.denoiseRange.onchange = () => this.denoise();
+    this.unsharpMaskRadiusRange.oninput = () => this.unsharpMask();
+    this.unsharpMaskRadiusRange.onchange = () => this.unsharpMask();
+    this.unsharpMaskStrengthRange.oninput = () => this.unsharpMask();
+    this.unsharpMaskStrengthRange.onchange = () => this.unsharpMask();
+    this.sepiaRange.oninput = () => this.sepia();
+    this.sepiaRange.onchange = () => this.sepia();
+
+    panel.querySelector(".binarizationBlocksizeReset").onclick = () => {
+      this.binarizationBlocksizeRange.value =
+        this.binarizationBlocksizeRange.dataset.value;
+      this.binarization();
+    };
+    panel.querySelector(".binarizationCReset").onclick = () => {
+      this.binarizationCRange.value = this.binarizationCRange.dataset.value;
+      this.binarization();
+    };
+    panel.querySelector(".brightnessReset").onclick = () => {
+      this.brightnessRange.value = this.brightnessRange.dataset.value;
+      this.brightnessContrast();
+    };
+    panel.querySelector(".contrastReset").onclick = () => {
+      this.contrastRange.value = this.contrastRange.dataset.value;
+      this.brightnessContrast();
+    };
+    panel.querySelector(".hueReset").onclick = () => {
+      this.hueRange.value = this.hueRange.dataset.value;
+      this.hueSaturation();
+    };
+    panel.querySelector(".saturationReset").onclick = () => {
+      this.saturationRange.value = this.saturationRange.dataset.value;
+      this.hueSaturation();
+    };
+    panel.querySelector(".vibranceReset").onclick = () => {
+      this.vibranceRange.value = this.vibranceRange.dataset.value;
+      this.vibrance();
+    };
+    panel.querySelector(".denoiseReset").onclick = () => {
+      this.denoiseRange.value = this.denoiseRange.dataset.value;
+      this.denoise();
+    };
+    panel.querySelector(".unsharpMaskRadiusReset").onclick = () => {
+      this.unsharpMaskRadiusRange.value =
+        this.unsharpMaskRadiusRange.dataset.value;
+      this.unsharpMask();
+    };
+    panel.querySelector(".unsharpMaskStrengthReset").onclick = () => {
+      this.unsharpMaskStrengthRange.value =
+        this.unsharpMaskStrengthRange.dataset.value;
+      this.unsharpMask();
+    };
+    panel.querySelector(".sepiaReset").onclick = () => {
+      this.sepiaRange.value = this.sepiaRange.dataset.value;
+      this.sepia();
+    };
+  }
+
+  drawOffscreenCanvas(image, width, height) {
+    const canvas = this.offscreenCanvas;
+    canvas.width = width;
+    canvas.height = height;
+    this.offscreenCanvasContext.drawImage(
+      image,
+      0,
+      0,
+      width,
+      height,
+    );
+  }
+
+  setAspectRatio(aspectRatio) {
+    const { width, height } = this.canvas;
+    const currAspectRatio = width / height;
+    let tmpWidth, tmpHeight;
+    if (aspectRatio === 0) {
+      tmpWidth = width;
+      tmpHeight = height;
+    } else if (currAspectRatio < aspectRatio) {
+      tmpWidth = height * aspectRatio;
+      tmpHeight = height;
+    } else {
+      tmpWidth = width;
+      tmpHeight = width / aspectRatio;
+    }
+    this.drawOffscreenCanvas(this.canvas, tmpWidth, tmpHeight);
+    this.texture = this.glfxCanvas.texture(this.offscreenCanvas);
+    this.glfxCanvas.draw(this.texture).update();
+  }
+
+  binarization() {
+    const blockSize = Number(this.binarizationBlocksizeRange.value);
+    if (blockSize === Number(this.binarizationBlocksizeRange.min)) {
+      this.glfxCanvas.draw(this.texture).update();
+    } else {
+      const C = Number(this.binarizationCRange.value);
+      const { width, height } = this.glfxCanvas;
+      this.drawOffscreenCanvas(this.canvas, width, height);
+      const src = cv.imread(this.offscreenCanvas);
+      cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY);
+      cv.adaptiveThreshold(
+        src,
+        src,
+        255,
+        cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv.THRESH_BINARY,
+        blockSize * 2 + 1,
+        C,
+      );
+      cv.imshow(this.offscreenCanvas, src);
+      src.delete();
+      const texture = this.glfxCanvas.texture(this.offscreenCanvas);
+      this.glfxCanvas.draw(texture).update();
+    }
+  }
+
+  brightnessContrast() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const brightness = Number(this.brightnessRange.value);
+    const contrast = Number(this.contrastRange.value);
+    this.glfxCanvas.draw(this.texture)
+      .brightnessContrast(brightness, contrast).update();
+    this.filtering = false;
+  }
+
+  hueSaturation() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const hue = Number(this.hueRange.value);
+    const saturation = Number(this.saturationRange.value);
+    this.glfxCanvas.draw(this.texture)
+      .hueSaturation(hue, saturation).update();
+    this.filtering = false;
+  }
+
+  vibrance() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const value = Number(this.vibranceRange.value);
+    this.glfxCanvas.draw(this.texture)
+      .vibrance(value).update();
+    this.filtering = false;
+  }
+
+  denoise() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const value = Number(this.denoiseRange.value);
+    if (value === Number(this.denoiseRange.max)) {
+      this.glfxCanvas.draw(this.texture).update();
+    } else {
+      this.glfxCanvas.draw(this.texture)
+        .denoise(value).update();
+    }
+    this.filtering = false;
+  }
+
+  unsharpMask() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const radius = Number(this.unsharpMaskRadiusRange.value);
+    const strength = Number(this.unsharpMaskStrengthRange.value);
+    this.glfxCanvas.draw(this.texture)
+      .unsharpMask(radius, strength).update();
+    this.filtering = false;
+  }
+
+  sepia() {
+    if (this.filtering) return;
+    this.filtering = true;
+    const value = Number(this.sepiaRange.value);
+    this.glfxCanvas.draw(this.texture)
+      .sepia(value).update();
+    this.filtering = false;
+  }
+
+  setCanvas(canvas) {
+    if (canvas.tagName.toLowerCase() === "img") {
+      this.canvas.width = canvas.naturalWidth;
+      this.canvas.height = canvas.naturalHeight;
+    } else {
+      this.canvas.width = canvas.width;
+      this.canvas.height = canvas.height;
+    }
+    this.canvas.getContext("2d").drawImage(canvas, 0, 0);
+
+    this.texture = this.glfxCanvas.texture(this.canvas);
+    this.glfxCanvas.draw(this.texture).update();
+    this.glfxCanvas.setAttribute("class", "w-100 h-100 object-fit-contain");
+    this.canvas.replaceWith(this.glfxCanvas);
+    canvas.setAttribute("class", "w-100 h-100 object-fit-contain");
+    // this.canvas = canvas;
+  }
+
+  backToCrop() {
+    editCarousel.carousel.to(0);
+  }
+
+  rotate() {
+    const angle = 90;
+    const canvas = document.createElement("canvas");
+    const glfxCanvas = this.glfxCanvas;
+    const width = glfxCanvas.width;
+    const height = glfxCanvas.height;
+    const radian = angle * Math.PI / 180;
+    // const cosAngle = Math.abs(Math.cos(radian));
+    // const sinAngle = Math.abs(Math.sin(radian));
+    const cosAngle = Math.cos(radian);
+    const sinAngle = Math.sin(radian);
+    const rotatedWidth = cosAngle * width + sinAngle * height;
+    const rotatedHeight = sinAngle * width + cosAngle * height;
+    canvas.width = rotatedWidth;
+    canvas.height = rotatedHeight;
+    const context = canvas.getContext("2d");
+    context.translate(rotatedWidth / 2, rotatedHeight / 2);
+    context.rotate(radian);
+    this.glfxCanvas.update();
+    context.drawImage(this.glfxCanvas, -width / 2, -height / 2);
+    this.texture = this.glfxCanvas.texture(canvas);
+    this.glfxCanvas.draw(this.texture).update();
+  }
+
+  saveToAlbum() {
+    this.glfxCanvas.update();
+    thumbnailPanel.add(this.glfxCanvas);
+  }
+}
+
+class EditCarousel extends Panel {
+  constructor(panel) {
+    super(panel);
+    this.carousel = new Carousel(panel, { touch: false });
+  }
+}
+
+class ConfigPanel extends Panel {
+  constructor(panel) {
+    super(panel);
+    this.collapse = new Collapse(panel, { toggle: false });
+    this.configForm = panel.querySelector(".configForm");
+    this.resolution = panel.querySelector(".resolution");
+    this.clientId = panel.querySelector(".clientId");
+    this.serverAddress = panel.querySelector(".serverAddress");
+    this.resolution.onchange = async () => {
+      if (!cameraPanel.stream) return;
+      this.setResolution();
+      await cameraPanel.initVideo();
+    };
+    this.clientId.onchange = (event) => {
+      localStorage.setItem("clientId", event.currentTarget.value);
+    };
+    this.serverAddress.onchange = (event) => {
+      localStorage.setItem("serverAddress", event.currentTarget.value);
+    };
+    panel.querySelector(".reloadApp").onclick = () => this.reloadApp();
+    panel.querySelector(".clearConfig").onclick = (event) =>
+      this.clearConfig(event);
+  }
+
+  setResolution() {
+    const [width, height] = this.getIdealResolution();
+    const aspectRatio = width / height;
+    const videoOptions = cameraPanel.videoOptions.video;
+    videoOptions.width = { ideal: width };
+    videoOptions.height = { ideal: height };
+    videoOptions.aspectRatio = { exact: aspectRatio };
+  }
+
+  getIdealResolution() {
+    const track = cameraPanel.stream.getVideoTracks()[0];
+    const settings = cameraPanel.getSettings(track);
+    const area = Number(this.configForm.resolution.value);
+    if (area === 0) return [settings.width, settings.height];
+    const { aspectRatio } = settings;
+    const height = Math.sqrt(area * 1000 / aspectRatio);
+    return [height * aspectRatio, height];
+  }
+
+  uploadDropbox() {
+    const query = new URLSearchParams(location.href);
+    if (this.clientId.value != "" && query.has("access_token")) {
+      const dbx = new Dropbox.Dropbox({
+        fetch: fetch,
+        accessToken: query.get("access_token"),
+      });
+      const gallery = thumbnailPanel.gallery;
+      for (let i = 0; i < gallery.children.length; i++) {
+        const path = "/" + i + ".jpg";
+        const base64 = gallery.children[i].shadowRoot.querySelector("img").src;
+        dbx.filesUpload({
+          path: path,
+          contents: this.base64ToArrayBuffer(base64),
+        })
+          .then(() => {
+          }).catch((err) => {
+            console.log(err);
+            alert(err.error.error_summary);
+          });
+      }
+    } else {
+      this.collapse.show();
+    }
+  }
+
+  // https://stackoverflow.com/questions/40998274/
+  base64ToArrayBuffer(base64) {
+    base64 = base64.slice(base64.indexOf("base64,") + 7);
+    const binaryString = globalThis.atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+
+  uploadServer() {
+    if (this.serverAddress.value != "") {
+      const formData = new FormData();
+      const gallery = thumbnailPanel.gallery;
+      for (let i = 0; i < gallery.children.length; i++) {
+        let base64 = gallery.children[i].shadowRoot.querySelector("img").src;
+        base64 = base64.slice(base64.indexOf("base64,") + 7);
+        formData.append("files", this.base64toJpg(base64), i + ".jpg");
+      }
+      fetch(this.serverAddress.value, {
+        method: "POST",
+        body: formData,
+        mode: "no-cors",
+      }).then(() => {
+      }).catch((err) => {
+        console.log(err);
+        alert(err);
+      });
+    } else {
+      this.collapse.show();
+    }
+  }
+
+  base64toJpg(base64) {
+    const bin = atob(base64.replace(/^.*,/, ""));
+    const buffer = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) {
+      buffer[i] = bin.charCodeAt(i);
+    }
+    return new Blob([buffer.buffer], { type: "image/jpeg" });
+  }
+
+  reloadApp() {
+    const baseUrl =
+      "https://www.dropbox.com/1/oauth2/authorize?response_type=token&redirect_uri=https://marmooo.github.io/photo-scanner/";
+    location.href = baseUrl + "&client_id=" + clientId.value;
+  }
+
+  clearConfig(event) {
+    localStorage.clear();
+    const node = event.target;
+    node.textContent = "✅ Cleared!";
+    setTimeout(() => {
+      node.textContent = "Clear Settings";
+    }, 2000);
+  }
+}
+
+const configPanel = new ConfigPanel(document.getElementById("configPanel"));
+const thumbnailPanel = new ThumbnailPanel(
+  document.getElementById("thumbnailPanel"),
 );
-tooltipTriggerList.map((tooltipTriggerEl) => {
-  return new Tooltip(tooltipTriggerEl);
-});
-const previewModal = new Modal(document.getElementById("previewModal"));
-new Collapse(document.getElementById("configToolbar"), { toggle: false });
-
-document.getElementById("config").addEventListener("change", (event) => {
-  const name = event.currentTarget.name;
-  switch (name) {
-    case "resolution":
-      localStorage.setItem(name, event.currentTarget.selectedIndex);
-      break;
-    case "filter":
-    case "clientId":
-    case "serverAddress":
-      localStorage.setItem(name, event.currentTarget.value);
-      break;
-  }
-});
-document.getElementById("overview").addEventListener("click", () => {
-  localStorage.setItem("overview", 0);
-});
-document.getElementById("clearConfig").onclick = clearConfig;
+const editCarousel = new EditCarousel(document.getElementById("editCarousel"));
+const filterPanel = new FilterPanel(document.getElementById("filterPanel"));
+const loadPanel = new LoadPanel(document.getElementById("loadPanel"));
+const cameraPanel = new CameraPanel(document.getElementById("cameraPanel"));
+const cropPanel = new CropPanel(document.getElementById("cropPanel"));
+loadConfig();
+initLangSelect();
+initTooltip();
 document.getElementById("toggleDarkMode").onclick = toggleDarkMode;
-document.getElementById("deleteThumbnails").onclick = deleteThumbnails;
-document.getElementById("downloadThumbnails").onclick = downloadThumbnails;
-document.getElementById("uploadDropbox").onclick = uploadDropbox;
-document.getElementById("uploadServer").onclick = uploadServer;
+globalThis.addEventListener("resize", () => cropPanel.resizeCropPivots());
+
+await loadScript(await getOpenCVPath());
+cv = await cv();
