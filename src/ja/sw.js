@@ -1,4 +1,4 @@
-const CACHE_NAME = "2024-06-05 14:00";
+const CACHE_NAME = "2024-06-05 20:10";
 const urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/ja/",
@@ -31,13 +31,13 @@ async function getOpenCVPath() {
   }
 }
 
-async function loadOpenCV() {
+async function addOpenCVPaths() {
   const opencvPath = await getOpenCVPath();
   urlsToCache.push(opencvPath);
   urlsToCache.push(opencvPath.slice(0, -3) + ".wasm");
 }
 
-loadOpenCV();
+addOpenCVPaths();
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
