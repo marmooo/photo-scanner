@@ -1,6 +1,7 @@
 import {
   Carousel,
   Collapse,
+  Popover,
   Tooltip,
 } from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/+esm";
 import glfx from "https://cdn.jsdelivr.net/npm/glfx@0.0.4/+esm";
@@ -278,6 +279,8 @@ class LoadPanel extends Panel {
 class CameraPanel extends Panel {
   stream;
   animationFrame;
+  defaultWidth;
+  defaultHeight;
   lastAnimated = 0;
 
   constructor(panel) {
@@ -311,12 +314,49 @@ class CameraPanel extends Panel {
     panel.querySelector(".toggleFacingMode").onclick = () =>
       this.toggleFacingMode();
     panel.querySelector(".snapshot").onclick = () => this.snapshot();
+    const resolution = panel.querySelector(".resolution");
+    const resolutionRange = document.createElement("input");
+    resolutionRange.type = "range";
+    resolutionRange.min = 1;
+    resolutionRange.max = 10;
+    resolutionRange.value = 5;
+    resolutionRange.dataset.value = 5;
+    resolutionRange.className = "resolutionRange form-range";
+    new Popover(resolution, {
+      trigger: "click",
+      placement: "top",
+      html: true,
+      content: resolutionRange,
+      customClass: "resolutionPopover",
+    });
+    resolutionRange.onchange = async () => {
+      if (!this.stream) return;
+      this.setResolution();
+      await this.initVideo();
+    };
+    this.resolutionRange = resolutionRange;
   }
 
   moveLoadPanel() {
     this.stopCamera();
     this.hide();
     loadPanel.show();
+  }
+
+  setResolution() {
+    const [width, height] = this.getIdealResolution();
+    const aspectRatio = width / height;
+    const videoOptions = this.videoOptions.video;
+    videoOptions.width = { ideal: width };
+    videoOptions.height = { ideal: height };
+    videoOptions.aspectRatio = { exact: aspectRatio };
+  }
+
+  getIdealResolution() {
+    const value = Number(this.resolutionRange.value);
+    const defaultValue = Number(this.resolutionRange.dataset.value);
+    const factor = Math.sqrt(2) ** (value - defaultValue);
+    return [this.defaultWidth * factor, this.defaultHeight * factor];
   }
 
   toggleFacingMode() {
@@ -344,7 +384,7 @@ class CameraPanel extends Panel {
     const videoOptions = this.videoOptions.video;
     videoOptions.width = { ideal: width };
     videoOptions.height = { ideal: height };
-    // videoOptions.aspectRatio = { exact: aspectRatio };
+    videoOptions.aspectRatio = { exact: aspectRatio };
   }
 
   setCanvasSize(settings) {
@@ -387,6 +427,10 @@ class CameraPanel extends Panel {
     const settings = this.getSettings(track);
     this.updateVideoOptions(settings);
     this.setCanvasSize(settings);
+    if (!this.defaultWidth) {
+      this.defaultWidth = settings.width;
+      this.defaultHeight = settings.height;
+    }
   }
 
   async executeVideo() {
@@ -1098,11 +1142,6 @@ class ConfigPanel extends Panel {
     this.resolution = panel.querySelector(".resolution");
     this.clientId = panel.querySelector(".clientId");
     this.serverAddress = panel.querySelector(".serverAddress");
-    this.resolution.onchange = async () => {
-      if (!cameraPanel.stream) return;
-      this.setResolution();
-      await cameraPanel.initVideo();
-    };
     this.clientId.onchange = (event) => {
       localStorage.setItem("clientId", event.currentTarget.value);
     };
@@ -1112,25 +1151,6 @@ class ConfigPanel extends Panel {
     panel.querySelector(".reloadApp").onclick = () => this.reloadApp();
     panel.querySelector(".clearConfig").onclick = (event) =>
       this.clearConfig(event);
-  }
-
-  setResolution() {
-    const [width, height] = this.getIdealResolution();
-    const aspectRatio = width / height;
-    const videoOptions = cameraPanel.videoOptions.video;
-    videoOptions.width = { ideal: width };
-    videoOptions.height = { ideal: height };
-    videoOptions.aspectRatio = { exact: aspectRatio };
-  }
-
-  getIdealResolution() {
-    const track = cameraPanel.stream.getVideoTracks()[0];
-    const settings = cameraPanel.getSettings(track);
-    const area = Number(this.configForm.resolution.value);
-    if (area === 0) return [settings.width, settings.height];
-    const { aspectRatio } = settings;
-    const height = Math.sqrt(area * 1000 / aspectRatio);
-    return [height * aspectRatio, height];
   }
 
   uploadDropbox() {
