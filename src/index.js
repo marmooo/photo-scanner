@@ -214,7 +214,6 @@ class LoadPanel extends Panel {
   }
 
   executeCamera() {
-    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     cropPanel.hide();
     loadPanel.hide();
     cameraPanel.show();
@@ -286,6 +285,7 @@ class CameraPanel extends Panel {
 
   constructor(panel) {
     super(panel);
+    this.panelContainer = panel.querySelector(".panelContainer");
     const video = document.createElement("video");
     video.addEventListener("resize", async () => {
       const { videoWidth, videoHeight } = video;
@@ -338,6 +338,11 @@ class CameraPanel extends Panel {
     this.resolutionRange = resolutionRange;
   }
 
+  show() {
+    super.show();
+    this.panelContainer.scrollIntoView({ behavior: "instant" });
+  }
+
   moveLoadPanel() {
     this.stopCamera();
     this.hide();
@@ -371,12 +376,10 @@ class CameraPanel extends Panel {
   }
 
   stopCamera() {
-    const srcObject = this.video.srcObject;
-    if (srcObject) {
-      srcObject.getVideoTracks().forEach((track) => {
-        track.stop();
-      });
-    }
+    if (!this.stream) return;
+    this.stream.getVideoTracks().forEach((track) => {
+      track.stop();
+    });
     this.stream = null;
   }
 
@@ -481,22 +484,20 @@ class CameraPanel extends Panel {
   };
 
   snapshot() {
-    if (this.video.srcObject) {
-      globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
-      new Audio("/photo-scanner/camera.mp3").play();
-      this.hide();
-      editCarousel.show();
-      cropPanel.canvas.width = this.video.videoWidth;
-      cropPanel.canvas.height = this.video.videoHeight;
-      cropPanel.show();
-      cropPanel.canvasContext.drawImage(this.canvas, 0, 0);
-      cropPanel.setCropPivotsPosition();
-      const src = cv.imread(cropPanel.canvas);
-      const rect = this.findRect(src, cropPanel.canvas);
-      src.delete();
-      cropPanel.drawSvgRect(rect);
-      this.stopCamera();
-    }
+    if (!this.stream) return;
+    new Audio("/photo-scanner/camera.mp3").play();
+    this.hide();
+    editCarousel.show();
+    cropPanel.canvas.width = this.video.videoWidth;
+    cropPanel.canvas.height = this.video.videoHeight;
+    cropPanel.show();
+    cropPanel.canvasContext.drawImage(this.canvas, 0, 0);
+    cropPanel.setCropPivotsPosition();
+    const src = cv.imread(cropPanel.canvas);
+    const rect = this.findRect(src, cropPanel.canvas);
+    src.delete();
+    cropPanel.drawSvgRect(rect);
+    this.stopCamera();
   }
 
   fixRect(rect, canvas) {
@@ -578,8 +579,7 @@ class CropPanel extends LoadPanel {
 
   constructor(panel) {
     super(panel);
-
-    this.panel = panel;
+    this.panelContainer = panel.querySelector(".panelContainer");
     this.canvas = panel.querySelector("canvas");
     this.canvasContext = this.canvas.getContext("2d", {
       willReadFrequently: true,
@@ -593,7 +593,6 @@ class CropPanel extends LoadPanel {
     this.addDraggablePivotsEvents();
     panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
     panel.querySelector(".perspectiveProjection").onclick = () => {
-      globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
       const canvas = this.perspectiveProjection();
       filterPanel.setCanvas(canvas);
       filterPanel.show();
@@ -601,8 +600,12 @@ class CropPanel extends LoadPanel {
     };
   }
 
+  show() {
+    super.show();
+    this.panelContainer.scrollIntoView({ behavior: "instant" });
+  }
+
   moveLoadPanel() {
-    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     this.hide();
     editCarousel.hide();
     loadPanel.show();
@@ -810,6 +813,7 @@ class ThumbnailPanel extends Panel {
 class FilterPanel extends Panel {
   constructor(panel) {
     super(panel);
+    this.panelContainer = panel.querySelector(".panelContainer");
     this.selectedIndex = 0;
     this.glfxCanvas = glfx.canvas();
     this.canvas = panel.querySelector("canvas");
@@ -831,10 +835,10 @@ class FilterPanel extends Panel {
 
   show() {
     super.show();
+    this.panelContainer.scrollIntoView({ behavior: "instant" }); // TODO: Carousel
   }
 
   moveLoadPanel() {
-    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     this.hide();
     editCarousel.hide();
     editCarousel.carousel.to(0);
@@ -1099,8 +1103,8 @@ class FilterPanel extends Panel {
   }
 
   backToCrop() {
-    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     editCarousel.carousel.to(0);
+    cropPanel.show();
   }
 
   rotate() {
