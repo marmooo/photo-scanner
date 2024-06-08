@@ -214,8 +214,8 @@ class LoadPanel extends Panel {
   }
 
   executeCamera() {
+    this.hide();
     cropPanel.hide();
-    loadPanel.hide();
     cameraPanel.show();
     cameraPanel.executeVideo();
   }
@@ -824,6 +824,7 @@ class FilterPanel extends Panel {
     this.canvasContainer = this.canvas.parentNode;
 
     panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
+    panel.querySelector(".executeCamera").onclick = () => this.executeCamera();
     panel.querySelector(".filterSelect").onchange = (event) =>
       this.filterSelect(event);
     panel.querySelector(".backToCrop").onclick = () => this.backToCrop();
@@ -843,6 +844,14 @@ class FilterPanel extends Panel {
     editCarousel.hide();
     editCarousel.carousel.to(0);
     loadPanel.show();
+  }
+
+  executeCamera() {
+    this.hide();
+    editCarousel.hide();
+    editCarousel.carousel.to(0);
+    cameraPanel.show();
+    cameraPanel.executeVideo();
   }
 
   filterSelect(event) {
