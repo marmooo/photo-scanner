@@ -213,6 +213,11 @@ class LoadPanel extends Panel {
     };
   }
 
+  show() {
+    super.show();
+    document.body.scrollIntoView({ behavior: "instant" });
+  }
+
   executeCamera() {
     this.hide();
     cropPanel.hide();
