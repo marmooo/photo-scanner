@@ -76,7 +76,7 @@ class ImageBox extends HTMLElement {
       filterPanel.show();
       editCarousel.carousel.to(1);
     };
-    template.querySelector(".close").onclick = () => this.remove();
+    template.querySelector(".delete").onclick = () => this.remove();
     this.attachShadow({ mode: "open" }).appendChild(template);
   }
 }
@@ -762,7 +762,7 @@ class ThumbnailPanel extends Panel {
   constructor(panel) {
     super(panel);
     this.gallery = panel.querySelector(".gallery");
-    panel.querySelector(".remove").onclick = () => this.remove();
+    panel.querySelector(".deleteAll").onclick = () => this.deleteAll();
     panel.querySelector(".download").onclick = () => this.download();
     panel.querySelector(".uploadDropbox").onclick = () => {
       configPanel.uploadDropbox();
@@ -784,7 +784,7 @@ class ThumbnailPanel extends Panel {
     this.gallery.append(thumbnail);
   }
 
-  remove() {
+  deleteAll() {
     while (this.gallery.firstChild) {
       this.gallery.removeChild(this.gallery.lastChild);
     }
