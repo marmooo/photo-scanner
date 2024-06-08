@@ -214,6 +214,7 @@ class LoadPanel extends Panel {
   }
 
   executeCamera() {
+    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     cropPanel.hide();
     loadPanel.hide();
     cameraPanel.show();
@@ -481,6 +482,7 @@ class CameraPanel extends Panel {
 
   snapshot() {
     if (this.video.srcObject) {
+      globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
       new Audio("/photo-scanner/camera.mp3").play();
       this.hide();
       editCarousel.show();
@@ -591,6 +593,7 @@ class CropPanel extends LoadPanel {
     this.addDraggablePivotsEvents();
     panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
     panel.querySelector(".perspectiveProjection").onclick = () => {
+      globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
       const canvas = this.perspectiveProjection();
       filterPanel.setCanvas(canvas);
       filterPanel.show();
@@ -599,6 +602,7 @@ class CropPanel extends LoadPanel {
   }
 
   moveLoadPanel() {
+    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     this.hide();
     editCarousel.hide();
     loadPanel.show();
@@ -830,6 +834,7 @@ class FilterPanel extends Panel {
   }
 
   moveLoadPanel() {
+    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     this.hide();
     editCarousel.hide();
     editCarousel.carousel.to(0);
@@ -1094,6 +1099,7 @@ class FilterPanel extends Panel {
   }
 
   backToCrop() {
+    globalThis.scroll({ top: 0, left: 0, behavior: "instant" });
     editCarousel.carousel.to(0);
   }
 
