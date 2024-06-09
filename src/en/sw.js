@@ -1,4 +1,4 @@
-const CACHE_NAME = "2024-06-08 22:00";
+const CACHE_NAME = "2024-06-09 09:50";
 const urlsToCache = [
   "/photo-scanner/",
   "/photo-scanner/en/",
@@ -9,7 +9,6 @@ const urlsToCache = [
   "/photo-scanner/camera.mp3",
   "/photo-scanner/favicon/favicon.svg",
   "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.6.1/dist/umd/index.min.js",
-  "https://cdn.jsdelivr.net/npm/dropbox@10.34.0/dist/Dropbox-sdk.min.js",
 ];
 
 importScripts(

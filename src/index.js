@@ -1,13 +1,12 @@
 import {
   Carousel,
-  Collapse,
+  Offcanvas,
   Popover,
   Tooltip,
 } from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/+esm";
 import glfx from "https://cdn.jsdelivr.net/npm/glfx@0.0.4/+esm";
 
 function loadConfig() {
-  configPanel.clientId.value = localStorage.getItem("clientId");
   configPanel.serverAddress.value = localStorage.getItem("serverAddress");
   if (localStorage.getItem("darkMode") == 1) {
     document.documentElement.setAttribute("data-bs-theme", "dark");
@@ -776,14 +775,11 @@ class ThumbnailPanel extends Panel {
     this.gallery = panel.querySelector(".gallery");
     panel.querySelector(".deleteAll").onclick = () => this.deleteAll();
     panel.querySelector(".download").onclick = () => this.download();
-    panel.querySelector(".uploadDropbox").onclick = () => {
-      configPanel.uploadDropbox();
-    };
     panel.querySelector(".uploadServer").onclick = () => {
       configPanel.uploadServer();
     };
     panel.querySelector(".showConfig").onclick = () => {
-      configPanel.collapse.show();
+      configPanel.offcanvas.show();
     };
   }
 
@@ -1161,58 +1157,14 @@ class EditCarousel extends Panel {
 class ConfigPanel extends Panel {
   constructor(panel) {
     super(panel);
-    this.collapse = new Collapse(panel, { toggle: false });
-    this.configForm = panel.querySelector(".configForm");
+    this.offcanvas = new Offcanvas(panel);
     this.resolution = panel.querySelector(".resolution");
-    this.clientId = panel.querySelector(".clientId");
     this.serverAddress = panel.querySelector(".serverAddress");
-    this.clientId.onchange = (event) => {
-      localStorage.setItem("clientId", event.currentTarget.value);
-    };
     this.serverAddress.onchange = (event) => {
       localStorage.setItem("serverAddress", event.currentTarget.value);
     };
-    panel.querySelector(".reloadApp").onclick = () => this.reloadApp();
     panel.querySelector(".clearConfig").onclick = (event) =>
       this.clearConfig(event);
-  }
-
-  uploadDropbox() {
-    const query = new URLSearchParams(location.href);
-    if (this.clientId.value != "" && query.has("access_token")) {
-      const dbx = new Dropbox.Dropbox({
-        fetch: fetch,
-        accessToken: query.get("access_token"),
-      });
-      const gallery = thumbnailPanel.gallery;
-      for (let i = 0; i < gallery.children.length; i++) {
-        const path = "/" + i + ".jpg";
-        const base64 = gallery.children[i].shadowRoot.querySelector("img").src;
-        dbx.filesUpload({
-          path: path,
-          contents: this.base64ToArrayBuffer(base64),
-        })
-          .then(() => {
-          }).catch((err) => {
-            console.log(err);
-            alert(err.error.error_summary);
-          });
-      }
-    } else {
-      this.collapse.show();
-    }
-  }
-
-  // https://stackoverflow.com/questions/40998274/
-  base64ToArrayBuffer(base64) {
-    base64 = base64.slice(base64.indexOf("base64,") + 7);
-    const binaryString = globalThis.atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
   }
 
   uploadServer() {
@@ -1234,7 +1186,7 @@ class ConfigPanel extends Panel {
         alert(err);
       });
     } else {
-      this.collapse.show();
+      this.offcanvas.show();
     }
   }
 
@@ -1245,12 +1197,6 @@ class ConfigPanel extends Panel {
       buffer[i] = bin.charCodeAt(i);
     }
     return new Blob([buffer.buffer], { type: "image/jpeg" });
-  }
-
-  reloadApp() {
-    const baseUrl =
-      "https://www.dropbox.com/1/oauth2/authorize?response_type=token&redirect_uri=https://marmooo.github.io/photo-scanner/";
-    location.href = baseUrl + "&client_id=" + clientId.value;
   }
 
   clearConfig(event) {
