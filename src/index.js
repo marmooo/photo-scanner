@@ -291,16 +291,6 @@ class CameraPanel extends Panel {
     super(panel);
     this.panelContainer = panel.querySelector(".panelContainer");
     const video = document.createElement("video");
-    video.addEventListener("resize", async () => {
-      const { videoWidth, videoHeight } = video;
-      if (!videoWidth) return;
-      if (!videoHeight) return;
-      if (!this.stream) return;
-      const track = this.stream.getVideoTracks()[0];
-      const settings = this.getSettings(track);
-      if (videoWidth === settings.width) return;
-      await track.applyConstraints(this.videoOptions.video);
-    });
     video.addEventListener("play", () => {
       this.loadingMessage.classList.add("d-none");
     });
@@ -357,8 +347,8 @@ class CameraPanel extends Panel {
     const [width, height] = this.getIdealResolution();
     const aspectRatio = width / height;
     const videoOptions = this.videoOptions.video;
-    videoOptions.width = { ideal: width };
-    videoOptions.height = { ideal: height };
+    videoOptions.width = { min: 0, max: width };
+    videoOptions.height = { min: 0, max: height };
     videoOptions.aspectRatio = { exact: aspectRatio };
   }
 
@@ -387,44 +377,26 @@ class CameraPanel extends Panel {
     this.stream = null;
   }
 
-  updateVideoOptions(settings) {
+  initVideoOptions(settings) {
     const { width, height, aspectRatio } = settings;
     const videoOptions = this.videoOptions.video;
-    videoOptions.width = { ideal: width };
-    videoOptions.height = { ideal: height };
-    videoOptions.aspectRatio = { exact: aspectRatio };
-  }
-
-  setCanvasSize(settings) {
-    cameraPanel.canvas.width = settings.width;
-    cameraPanel.canvas.height = settings.height;
-  }
-
-  getSettings(track) {
-    const settings = track.getSettings();
-    const { width, height } = settings;
-    // The initial value of settings.aspectRatio is undefined on iOS
-    if (!settings.aspectRatio) settings.aspectRatio = width / height;
-    if (globalThis.innerHeight > globalThis.innerWidth) {
-      if (settings.height < settings.width) {
-        settings.width = height;
-        settings.height = width;
-        settings.aspectRatio = 1 / settings.aspectRatio;
-      }
-    } else {
-      if (settings.height > settings.width) {
-        settings.width = height;
-        settings.height = width;
-        settings.aspectRatio = 1 / settings.aspectRatio;
-      }
+    const isPortrait = globalThis.innerHeight > globalThis.innerWidth;
+    const isIOS = CSS.supports("-webkit-touch-callout: default");
+    const idealWidth = isPortrait && !isIOS ? height : width;
+    const idealHeight = isPortrait && !isIOS ? width : height;
+    const exactAspectRatio = isPortrait && !isIOS ? 1 / aspectRatio : aspectRatio;
+    videoOptions.width = { ideal: idealWidth };
+    videoOptions.height = { ideal: idealHeight };
+    videoOptions.aspectRatio = { exact: exactAspectRatio };
+    if (!this.defaultWidth) {
+      this.defaultWidth = width;
+      this.defaultHeight = height;
     }
-    return settings;
+    this.canvas.width = idealWidth;
+    this.canvas.height = idealHeight;
   }
 
   async initVideo() {
-    // video.videoWidth and getSettings().width are often different.
-    // So we need to check their values in video.addEventListener("resize")
-    // and make them same if they are different.
     if (!this.stream) {
       this.stream = await navigator.mediaDevices.getUserMedia(
         this.videoOptions,
@@ -432,13 +404,9 @@ class CameraPanel extends Panel {
     }
     const track = this.stream.getVideoTracks()[0];
     await track.applyConstraints(this.videoOptions.video);
-    const settings = this.getSettings(track);
-    this.updateVideoOptions(settings);
-    this.setCanvasSize(settings);
-    if (!this.defaultWidth) {
-      this.defaultWidth = settings.width;
-      this.defaultHeight = settings.height;
-    }
+    const settings = track.getSettings();
+    this.initVideoOptions(settings);
+    await track.applyConstraints(this.videoOptions.video);
   }
 
   async executeVideo() {
