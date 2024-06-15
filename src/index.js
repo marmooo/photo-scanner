@@ -382,9 +382,9 @@ class CameraPanel extends Panel {
     const videoOptions = this.videoOptions.video;
     const isPortrait = globalThis.innerHeight > globalThis.innerWidth;
     const isIOS = CSS.supports("-webkit-touch-callout: default");
-    const idealWidth = isPortrait && !isIOS ? height : width;
-    const idealHeight = isPortrait && !isIOS ? width : height;
-    const exactAspectRatio = isPortrait && !isIOS ? 1 / aspectRatio : aspectRatio;
+    const [idealWidth, idealHeight, exactAspectRatio] = isPortrait && !isIOS
+      ? [height, width, 1 / aspectRatio]
+      : [width, height, aspectRatio];
     videoOptions.width = { ideal: idealWidth };
     videoOptions.height = { ideal: idealHeight };
     videoOptions.aspectRatio = { exact: exactAspectRatio };
