@@ -346,8 +346,8 @@ class CameraPanel extends Panel {
     const [width, height] = this.getIdealResolution();
     const aspectRatio = width / height;
     const videoOptions = this.videoOptions.video;
-    videoOptions.width = { min: 0, max: width };
-    videoOptions.height = { min: 0, max: height };
+    videoOptions.width = { ideal: width };
+    videoOptions.height = { ideal: height };
     videoOptions.aspectRatio = { exact: aspectRatio };
   }
 
