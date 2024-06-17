@@ -219,7 +219,6 @@ class LoadPanel extends Panel {
 
   executeCamera() {
     this.hide();
-    cropPanel.hide();
     cameraPanel.show();
     cameraPanel.executeVideo();
   }
