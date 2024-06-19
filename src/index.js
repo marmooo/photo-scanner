@@ -316,6 +316,12 @@ class CameraPanel extends Panel {
     resolutionRange.value = 5;
     resolutionRange.dataset.value = 5;
     resolutionRange.className = "resolutionRange form-range";
+    resolutionRange.onchange = async () => {
+      if (!this.stream) return;
+      this.setResolution();
+      await this.initVideo();
+    };
+    this.resolutionRange = resolutionRange;
     this.resolutionPopover = new Popover(resolution, {
       trigger: "click",
       placement: "top",
@@ -324,12 +330,6 @@ class CameraPanel extends Panel {
       customClass: "resolutionPopover",
       animation: false,
     });
-    resolutionRange.onchange = async () => {
-      if (!this.stream) return;
-      this.setResolution();
-      await this.initVideo();
-    };
-    this.resolutionRange = resolutionRange;
   }
 
   show() {
