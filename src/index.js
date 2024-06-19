@@ -316,12 +316,13 @@ class CameraPanel extends Panel {
     resolutionRange.value = 5;
     resolutionRange.dataset.value = 5;
     resolutionRange.className = "resolutionRange form-range";
-    new Popover(resolution, {
+    this.resolutionPopover = new Popover(resolution, {
       trigger: "click",
       placement: "top",
       html: true,
       content: resolutionRange,
       customClass: "resolutionPopover",
+      animation: false,
     });
     resolutionRange.onchange = async () => {
       if (!this.stream) return;
@@ -337,6 +338,7 @@ class CameraPanel extends Panel {
   }
 
   moveLoadPanel() {
+    this.resolutionPopover.hide();
     this.stopCamera();
     this.hide();
     loadPanel.show();
@@ -359,6 +361,7 @@ class CameraPanel extends Panel {
   }
 
   toggleFacingMode() {
+    this.resolutionPopover.hide();
     const video = this.videoOptions.video;
     if (video.facingMode == "user") {
       video.facingMode = "environment";
@@ -455,6 +458,7 @@ class CameraPanel extends Panel {
   };
 
   snapshot() {
+    this.resolutionPopover.hide();
     if (!this.stream) return;
     new Audio("/photo-scanner/camera.mp3").play();
     this.hide();
