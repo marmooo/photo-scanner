@@ -36,7 +36,11 @@ function initTooltip() {
     const tooltip = new Tooltip(node);
     node.addEventListener("touchstart", () => tooltip.show());
     node.addEventListener("touchend", () => tooltip.hide());
-    node.addEventListener("click", () => tooltip.hide());
+    node.addEventListener("click", () => {
+      tooltip.tip.classList.add("d-none");
+      tooltip.hide();
+      tooltip.tip.classList.remove("d-none");
+    });
   }
 }
 
@@ -329,7 +333,6 @@ class CameraPanel extends Panel {
       html: true,
       content: resolutionRange,
       customClass: "resolutionPopover",
-      animation: false,
     });
   }
 
@@ -338,8 +341,17 @@ class CameraPanel extends Panel {
     this.panelContainer.scrollIntoView({ behavior: "instant" });
   }
 
+  hideResolutionPopover() {
+    const popover = this.resolutionPopover;
+    if (popover.tip) {
+      popover.tip.classList.add("d-none");
+      popover.hide();
+      popover.tip.classList.remove("d-none");
+    }
+  }
+
   moveLoadPanel() {
-    this.resolutionPopover.hide();
+    this.hideResolutionPopover();
     this.stopCamera();
     this.hide();
     loadPanel.show();
@@ -362,7 +374,7 @@ class CameraPanel extends Panel {
   }
 
   toggleFacingMode() {
-    this.resolutionPopover.hide();
+    this.hideResolutionPopover();
     const video = this.videoOptions.video;
     if (video.facingMode == "user") {
       video.facingMode = "environment";
@@ -459,7 +471,7 @@ class CameraPanel extends Panel {
   };
 
   snapshot() {
-    this.resolutionPopover.hide();
+    this.hideResolutionPopover();
     if (!this.stream) return;
     new Audio("/photo-scanner/camera.mp3").play();
     this.hide();
