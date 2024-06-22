@@ -37,6 +37,7 @@ function initTooltip() {
     node.addEventListener("touchstart", () => tooltip.show());
     node.addEventListener("touchend", () => tooltip.hide());
     node.addEventListener("click", () => {
+      if (!tooltip.tip) return;
       tooltip.tip.classList.add("d-none");
       tooltip.hide();
       tooltip.tip.classList.remove("d-none");
