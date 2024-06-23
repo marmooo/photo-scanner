@@ -248,6 +248,7 @@ class LoadPanel extends Panel {
   loadImage(url) {
     loadPanel.hide();
     editCarousel.show();
+    editCarousel.carousel.to(0);
     cropPanel.show();
     const img = new Image();
     img.onload = (event) => this.handleImageOnloadEvent(event);
@@ -796,7 +797,7 @@ class ThumbnailPanel extends Panel {
   }
 }
 
-class FilterPanel extends Panel {
+class FilterPanel extends LoadPanel {
   constructor(panel) {
     super(panel);
     this.panelContainer = panel.querySelector(".panelContainer");
