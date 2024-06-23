@@ -77,8 +77,10 @@ class ImageBox extends HTMLElement {
     const template = document.getElementById("img-box")
       .content.cloneNode(true);
     template.querySelector("img").onclick = (event) => {
+      loadPanel.hide();
       filterPanel.setCanvas(event.target);
       filterPanel.show();
+      editCarousel.show();
       editCarousel.carousel.to(1);
     };
     template.querySelector(".delete").onclick = () => this.remove();
