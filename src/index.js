@@ -490,15 +490,19 @@ class CameraPanel extends Panel {
     this.stopCamera();
   }
 
-  fixRect(rect, canvas) {
-    const actualRect = this.getActualRect(canvas);
-    const w = actualRect.width;
-    const h = actualRect.height;
+  fixRect(rect, src, canvas) {
+    const { cols, rows } = src;
     rect.forEach((vertice) => {
       if (vertice.x < 0) vertice.x = 0;
-      if (w < vertice.x) vertice.x = w;
+      if (cols < vertice.x) vertice.x = cols;
       if (vertice.y < 0) vertice.y = 0;
-      if (h < vertice.y) vertice.y = h;
+      if (rows < vertice.y) vertice.y = rows;
+    });
+    const actualRect = this.getActualRect(canvas);
+    const scale = actualRect.width / src.cols;
+    rect.forEach((vertice) => {
+      vertice.x *= scale;
+      vertice.y *= scale;
     });
     return rect;
   }
@@ -558,7 +562,7 @@ class CameraPanel extends Panel {
     contours.delete();
     hierarchy.delete();
     cnt.delete();
-    return this.fixRect(vertices, canvas);
+    return this.fixRect(vertices, src, canvas);
   }
 }
 
@@ -664,7 +668,8 @@ class CropPanel extends LoadPanel {
     const canvas = document.createElement("canvas");
     const src = cv.imread(this.canvas);
 
-    const scale = this.canvas.offsetWidth / this.canvas.width;
+    const actualRect = this.getActualRect(this.canvas);
+    const scale = actualRect.width / this.canvas.width;
     const points = this.updatedPoints.map((p) => p / scale);
     const cvPoints = [
       ...points.slice(0, 4),
@@ -699,7 +704,8 @@ class CropPanel extends LoadPanel {
   // perspectiveProjection() {
   //   const w = this.canvas.width;
   //   const h = this.canvas.height;
-  //   const scale = this.canvas.offsetWidth / w;
+  //   const actualRect = this.getActualRect(this.canvas);
+  //   const scale = actualRect.width / w;
   //   const points = this.updatedPoints.map((p) => p / scale);
   //   const newPoints = [0, 0, w, 0, w, h, 0, h]
   //   const canvas = glfx.canvas();
@@ -709,11 +715,6 @@ class CropPanel extends LoadPanel {
   // }
 
   drawSvgRect(rect) {
-    const scale = this.canvas.offsetWidth / this.canvas.width;
-    rect.map((vertice) => {
-      vertice.x *= scale;
-      vertice.y *= scale;
-    });
     for (let i = 0; i < this.circles.length; i++) {
       const circle = this.circles[i];
       circle.setAttribute("cx", rect[i].x);
