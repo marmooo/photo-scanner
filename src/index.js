@@ -807,6 +807,9 @@ class FilterPanel extends LoadPanel {
     this.selectedIndex = 0;
     this.glfxCanvas = glfx.canvas();
     this.canvas = panel.querySelector("canvas");
+    this.canvasContext = this.canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     this.offscreenCanvas = document.createElement("canvas");
     this.offscreenCanvasContext = this.offscreenCanvas.getContext("2d", {
       willReadFrequently: true,
@@ -1091,7 +1094,7 @@ class FilterPanel extends LoadPanel {
       this.canvas.width = canvas.width;
       this.canvas.height = canvas.height;
     }
-    this.canvas.getContext("2d").drawImage(canvas, 0, 0);
+    this.canvasContext.drawImage(canvas, 0, 0);
 
     this.texture = this.glfxCanvas.texture(this.canvas);
     this.glfxCanvas.draw(this.texture).update();
@@ -1109,6 +1112,7 @@ class FilterPanel extends LoadPanel {
   rotate() {
     const angle = 90;
     const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
     const glfxCanvas = this.glfxCanvas;
     const width = glfxCanvas.width;
     const height = glfxCanvas.height;
@@ -1121,7 +1125,6 @@ class FilterPanel extends LoadPanel {
     const rotatedHeight = sinAngle * width + cosAngle * height;
     canvas.width = rotatedWidth;
     canvas.height = rotatedHeight;
-    const context = canvas.getContext("2d");
     context.translate(rotatedWidth / 2, rotatedHeight / 2);
     context.rotate(radian);
     this.glfxCanvas.update();
