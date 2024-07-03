@@ -248,6 +248,8 @@ class LoadPanel extends Panel {
   };
 
   loadImage(url) {
+    cameraPanel.stopCamera();
+    cameraPanel.hide();
     loadPanel.hide();
     editCarousel.show();
     editCarousel.carousel.to(0);
@@ -270,7 +272,7 @@ class LoadPanel extends Panel {
       return;
     }
     const url = URL.createObjectURL(file);
-    loadPanel.loadImage(url);
+    this.loadImage(url);
   }
 
   async loadClipboardImage() {
