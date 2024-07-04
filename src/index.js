@@ -261,7 +261,7 @@ class LoadPanel extends Panel {
 
   loadInputImage(event) {
     const file = event.currentTarget.files[0];
-    loadFile(file);
+    this.loadFile(file);
     event.currentTarget.value = "";
   }
 
