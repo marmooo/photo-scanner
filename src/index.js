@@ -7,7 +7,6 @@ import {
 import glfx from "https://cdn.jsdelivr.net/npm/glfx@0.0.4/+esm";
 
 function loadConfig() {
-  configPanel.serverAddress.value = localStorage.getItem("serverAddress");
   if (localStorage.getItem("darkMode") == 1) {
     document.documentElement.setAttribute("data-bs-theme", "dark");
   }
@@ -1159,6 +1158,7 @@ class ConfigPanel extends Panel {
     this.offcanvas = new Offcanvas(panel);
     this.resolution = panel.querySelector(".resolution");
     this.serverAddress = panel.querySelector(".serverAddress");
+    this.serverAddress.value = localStorage.getItem("serverAddress");
     this.serverAddress.onchange = (event) => {
       localStorage.setItem("serverAddress", event.currentTarget.value);
     };
@@ -1208,6 +1208,12 @@ class ConfigPanel extends Panel {
   }
 }
 
+loadConfig();
+initLangSelect();
+initTooltip();
+await loadScript(await getOpenCVPath());
+cv = await cv();
+
 const configPanel = new ConfigPanel(document.getElementById("configPanel"));
 const thumbnailPanel = new ThumbnailPanel(
   document.getElementById("thumbnailPanel"),
@@ -1217,9 +1223,6 @@ const filterPanel = new FilterPanel(document.getElementById("filterPanel"));
 const loadPanel = new LoadPanel(document.getElementById("loadPanel"));
 const cameraPanel = new CameraPanel(document.getElementById("cameraPanel"));
 const cropPanel = new CropPanel(document.getElementById("cropPanel"));
-loadConfig();
-initLangSelect();
-initTooltip();
 document.getElementById("toggleDarkMode").onclick = toggleDarkMode;
 globalThis.addEventListener("resize", () => cropPanel.resizeCropPivots());
 globalThis.ondragover = (event) => {
@@ -1236,6 +1239,3 @@ globalThis.addEventListener("paste", (event) => {
   if (!file) return;
   loadPanel.loadFile(file);
 });
-
-await loadScript(await getOpenCVPath());
-cv = await cv();
