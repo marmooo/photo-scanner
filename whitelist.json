@@ -1,0 +1,21 @@
+{
+  "core": {
+    "whitelist": {
+      "Algorithm": []
+    }
+  },
+  "imgproc": {
+    "whitelist": {
+      "": [
+        "adaptiveThreshold",
+        "contourArea",
+        "cvtColor",
+        "findContours",
+        "getPerspectiveTransform",
+        "medianBlur",
+        "minAreaRect",
+        "warpPerspective"
+      ]
+    }
+  }
+}
