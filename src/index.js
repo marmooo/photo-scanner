@@ -303,7 +303,6 @@ class CameraPanel extends Panel {
 
   constructor(panel) {
     super(panel);
-    this.panelContainer = panel.querySelector(".panelContainer");
     const video = document.createElement("video");
     video.addEventListener("play", () => {
       this.loadingMessage.classList.add("d-none");
@@ -348,7 +347,7 @@ class CameraPanel extends Panel {
 
   show() {
     super.show();
-    this.panelContainer.scrollIntoView({ behavior: "instant" });
+    this.panel.scrollIntoView({ behavior: "instant" });
   }
 
   hideResolutionPopover() {
@@ -581,7 +580,6 @@ class CropPanel extends LoadPanel {
 
   constructor(panel) {
     super(panel);
-    this.panelContainer = panel.querySelector(".panelContainer");
     this.canvas = panel.querySelector("canvas");
     this.canvasContext = this.canvas.getContext("2d", {
       willReadFrequently: true,
@@ -604,7 +602,7 @@ class CropPanel extends LoadPanel {
 
   show() {
     super.show();
-    this.panelContainer.scrollIntoView({ behavior: "instant" });
+    editCarousel.panel.scrollIntoView({ behavior: "instant" });
   }
 
   moveLoadPanel() {
@@ -809,7 +807,6 @@ class ThumbnailPanel extends Panel {
 class FilterPanel extends LoadPanel {
   constructor(panel) {
     super(panel);
-    this.panelContainer = panel.querySelector(".panelContainer");
     this.selectedIndex = 0;
     this.glfxCanvas = glfx.canvas();
     this.canvas = panel.querySelector("canvas");
@@ -835,7 +832,7 @@ class FilterPanel extends LoadPanel {
 
   show() {
     super.show();
-    this.panelContainer.scrollIntoView({ behavior: "instant" }); // TODO: Carousel
+    editCarousel.panel.scrollIntoView({ behavior: "instant" });
   }
 
   moveLoadPanel() {
