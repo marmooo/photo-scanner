@@ -202,7 +202,7 @@ class LoadPanel extends Panel {
   constructor(panel) {
     super(panel);
 
-    panel.querySelector(".clipboard").onclick = (event) => {
+    panel.querySelector(".loadClipboard").onclick = (event) => {
       this.loadClipboardImage(event);
     };
     panel.querySelector(".selectImage").onclick = () => {
@@ -767,7 +767,7 @@ class ThumbnailPanel extends Panel {
     super(panel);
     this.gallery = panel.querySelector(".gallery");
     panel.querySelector(".deleteAll").onclick = () => this.deleteAll();
-    panel.querySelector(".download").onclick = () => this.download();
+    panel.querySelector(".downloadAll").onclick = () => this.downloadAll();
     panel.querySelector(".showConfig").onclick = () => {
       configPanel.offcanvas.show();
     };
@@ -788,11 +788,11 @@ class ThumbnailPanel extends Panel {
     }
   }
 
-  download() {
+  downloadAll() {
     const gallery = this.gallery;
     for (let i = 0; i < gallery.children.length; i++) {
       const a = document.createElement("a");
-      a.download = i + ".jpg";
+      a.download = i + ".png";
       a.href = gallery.children[i].shadowRoot.querySelector("img").src;
       gallery.appendChild(a);
       a.click();
@@ -804,6 +804,22 @@ class ThumbnailPanel extends Panel {
 class FilterPanel extends LoadPanel {
   constructor(panel) {
     super(panel);
+    panel.querySelector(".saveClipboard").onclick = async () => {
+      const svgs = event.currentTarget.children;
+      svgs[0].classList.add("d-none");
+      svgs[1].classList.remove("d-none");
+      const blob = await new Promise((resolve) =>
+        this.canvas.toBlob(resolve, "image/png")
+      );
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
+      setTimeout(() => {
+        svgs[0].classList.remove("d-none");
+        svgs[1].classList.add("d-none");
+      }, 2000);
+    };
+
     this.selectedIndex = 0;
     this.glfxCanvas = glfx.canvas();
     this.canvas = panel.querySelector("canvas");
@@ -817,6 +833,7 @@ class FilterPanel extends LoadPanel {
     this.canvasContainer = this.canvas.parentNode;
 
     panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
+    panel.querySelector(".download").onclick = () => this.download();
     panel.querySelector(".executeCamera").onclick = () => this.executeCamera();
     panel.querySelector(".filterSelect").onchange = (event) =>
       this.filterSelect(event);
@@ -837,6 +854,19 @@ class FilterPanel extends LoadPanel {
     editCarousel.hide();
     editCarousel.carousel.to(0);
     loadPanel.show();
+  }
+
+  download() {
+    this.canvas.toBlob((blob) => {
+      const a = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = "scan.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, "image/png");
   }
 
   executeCamera() {
@@ -1172,7 +1202,7 @@ class ConfigPanel extends Panel {
     for (let i = 0; i < gallery.children.length; i++) {
       let base64 = gallery.children[i].shadowRoot.querySelector("img").src;
       base64 = base64.slice(base64.indexOf("base64,") + 7);
-      formData.append("files", this.base64toJpg(base64), i + ".jpg");
+      formData.append("files", this.base64toJpg(base64), i + ".png");
     }
     fetch(this.serverAddress.value, {
       method: "POST",
