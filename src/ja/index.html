@@ -228,7 +228,7 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                     <canvas class="w-100 h-100 object-fit-contain"></canvas>
                     <div class="filterNav bg-dark-subtle opacity-75 p-2">
                       <div class="form-group d-flex align-items-center">
-                        <div class="filterLabel col-form-label">Filter</div>
+                        <div class="filterLabel col-form-label-sm">Filter</div>
                         <div class="d-flex">
                           <select class="filterSelect form-select form-selecct-sm w-auto">
                             <optgroup label="Recommend">
@@ -297,14 +297,14 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="binarization d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Block size</div>
+                          <div class="filterLabel col-form-label-sm">Block size</div>
                           <div class="d-flex">
                             <input type="range" class="binarizationBlocksizeRange form-range" min="0" max="100" step="1" value="0" data-value="0">
                             <button title="reset" class="binarizationBlocksizeReset btn p-0" type="button">↩️</button>
                           </div>
                         </div>
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">C</div>
+                          <div class="filterLabel col-form-label-sm">C</div>
                           <div class="d-flex">
                             <input type="range" class="binarizationCRange form-range" min="0" max="100" step="1" value="10" data-value="10">
                             <button title="reset" class="binarizationCReset btn p-0" type="button">↩️</button>
@@ -313,14 +313,14 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="brightnessContrast d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Brightness</div>
+                          <div class="filterLabel col-form-label-sm">Brightness</div>
                           <div class="d-flex">
                             <input type="range" class="brightnessRange form-range" min="-1" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="brightnessReset btn p-0" type="button">↩️</button>
                           </div>
                         </div>
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Contrast</div>
+                          <div class="filterLabel col-form-label-sm">Contrast</div>
                           <div class="d-flex">
                             <input type="range" class="contrastRange form-range" min="-1" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="contrastReset btn p-0" type="button">↩️</button>
@@ -329,14 +329,14 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="hueSaturation d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Hue</div>
+                          <div class="filterLabel col-form-label-sm">Hue</div>
                           <div class="d-flex">
                             <input type="range" class="hueRange form-range" min="-1" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="hueReset btn p-0" type="button">↩️</button>
                           </div>
                         </div>
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Saturation</div>
+                          <div class="filterLabel col-form-label-sm">Saturation</div>
                           <div class="d-flex">
                             <input type="range" class="saturationRange form-range" min="-1" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="saturationReset btn p-0" type="button">↩️</button>
@@ -345,7 +345,7 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="vibrance d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Vibrance</div>
+                          <div class="filterLabel col-form-label-sm">Vibrance</div>
                           <div class="d-flex">
                             <input type="range" class="vibranceRange form-range" min="-1" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="vibranceReset btn p-0" type="button">↩️</button>
@@ -354,7 +354,7 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="denoise d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Exponent</div>
+                          <div class="filterLabel col-form-label-sm">Exponent</div>
                           <div class="d-flex">
                             <input type="range" class="denoiseRange form-range" min="0" max="51" step="1" value="51" data-value="51">
                             <button title="reset" class="denoiseReset btn p-0" type="button">↩️</button>
@@ -363,14 +363,14 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="unsharpMask d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Radius</div>
+                          <div class="filterLabel col-form-label-sm">Radius</div>
                           <div class="d-flex">
                             <input type="range" class="unsharpMaskRadiusRange form-range" min="0" max="200" step="1" value="0" data-value="0">
                             <button title="reset" class="unsharpMaskRadiusReset btn p-0" type="button">↩️</button>
                           </div>
                         </div>
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Strength</div>
+                          <div class="filterLabel col-form-label-sm">Strength</div>
                           <div class="d-flex">
                             <input type="range" class="unsharpMaskStrengthRange form-range" min="0" max="5" step="0.01" value="0" data-value="0">
                             <button title="reset" class="unsharpMaskStrengthReset btn p-0" type="button">↩️</button>
@@ -379,7 +379,7 @@ circle { fill:blue; stroke:white; stroke-width:4; opacity:.8; cursor:grab; }
                       </div>
                       <div class="sepia d-none">
                         <div class="form-group d-flex align-items-center">
-                          <div class="filterLabel col-form-label">Amount</div>
+                          <div class="filterLabel col-form-label-sm">Amount</div>
                           <div class="d-flex">
                             <input type="range" class="sepiaRange form-range" min="0" max="1" step="0.01" value="0" data-value="0">
                             <button title="reset" class="sepiaReset btn p-0" type="button">↩️</button>
