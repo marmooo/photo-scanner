@@ -3,7 +3,7 @@ import {
   Offcanvas,
   Popover,
   Tooltip,
-} from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/+esm";
+} from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/+esm";
 import glfx from "https://cdn.jsdelivr.net/npm/glfx@0.0.4/+esm";
 
 function loadConfig() {
