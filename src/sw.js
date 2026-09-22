@@ -1,15 +1,15 @@
-const cacheName = "2026-06-11 00:00";
+const cacheName = "2026-09-22 00:00";
 const urlsToCache = [
   "/photo-scanner/index.js",
   "/photo-scanner/img/scanner.svg",
   "/photo-scanner/img/loading.gif",
   "/photo-scanner/camera.mp3",
   "/photo-scanner/favicon/favicon.svg",
-  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.8.0/dist/umd/index.min.js",
+  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.9.0/dist/umd/index.min.js",
 ];
 
 importScripts(
-  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.8.0/dist/umd/index.min.js",
+  "https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.9.0/dist/umd/index.min.js",
 );
 
 async function getOpenCVPath() {
