@@ -63,6 +63,13 @@ function loadScript(url) {
   });
 }
 
+async function initOpenCV() {
+  await loadScript(await getOpenCVPath());
+  // opencv_js.js is built with MODULARIZE: `cv` stays a factory function
+  // until the WebAssembly runtime is ready.
+  globalThis.cv = typeof cv === "function" ? await cv() : await cv;
+}
+
 async function toBlob(canvas, type, quality) {
   return await new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
@@ -227,7 +234,7 @@ class LoadPanel extends Panel {
     cameraPanel.executeVideo();
   }
 
-  handleImageOnloadEvent = (event) => {
+  handleImageOnloadEvent = async (event) => {
     const img = event.currentTarget;
     const { naturalWidth, naturalHeight } = img;
     cropPanel.canvas.width = naturalWidth;
@@ -237,6 +244,12 @@ class LoadPanel extends Panel {
     filterPanel.canvas.height = naturalHeight;
 
     cropPanel.setCropPivotsPosition();
+    try {
+      await cvReady;
+    } catch (err) {
+      console.error(err);
+      return;
+    }
     const src = cv.imread(cropPanel.canvas);
     const rect = cameraPanel.findRect(src, cropPanel.canvas);
     src.delete();
@@ -476,7 +489,7 @@ class CameraPanel extends Panel {
     this.animationFrame = requestAnimationFrame(this.tickVideo);
   };
 
-  snapshot() {
+  async snapshot() {
     this.hideResolutionPopover();
     if (!this.stream) return;
     new Audio("/photo-scanner/camera.mp3").play();
@@ -487,11 +500,17 @@ class CameraPanel extends Panel {
     cropPanel.show();
     cropPanel.canvasContext.drawImage(this.canvas, 0, 0);
     cropPanel.setCropPivotsPosition();
+    this.stopCamera();
+    try {
+      await cvReady;
+    } catch (err) {
+      console.error(err);
+      return;
+    }
     const src = cv.imread(cropPanel.canvas);
     const rect = this.findRect(src, cropPanel.canvas);
     src.delete();
     cropPanel.drawSvgRect(rect);
-    this.stopCamera();
   }
 
   fixRect(rect, src, canvas) {
@@ -589,7 +608,13 @@ class CropPanel extends LoadPanel {
     this.addTransformPolygonEvents();
     this.addDraggablePivotsEvents();
     panel.querySelector(".moveTop").onclick = () => this.moveLoadPanel();
-    panel.querySelector(".perspectiveProjection").onclick = () => {
+    panel.querySelector(".perspectiveProjection").onclick = async () => {
+      try {
+        await cvReady;
+      } catch (err) {
+        console.error(err);
+        return;
+      }
       const canvas = this.perspectiveProjection();
       filterPanel.setCanvas(canvas);
       filterPanel.show();
@@ -1230,8 +1255,7 @@ class ConfigPanel extends Panel {
 
 initLangSelect();
 initTooltip();
-await loadScript(await getOpenCVPath());
-cv = await cv();
+const cvReady = initOpenCV();
 
 const configPanel = new ConfigPanel(document.getElementById("configPanel"));
 const thumbnailPanel = new ThumbnailPanel(
